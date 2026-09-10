@@ -1,0 +1,2155 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phòng Thí Nghiệm Di Truyền Học Lớp 9 - ADN, ARN & 20 Axit Amin</title>
+  <meta name="description" content="Ứng dụng mô phỏng phiên mã dịch mã, máy tính công thức ADN và tra cứu 20 axit amin sinh học 9 trực quan, hiện đại cho học sinh.">
+  
+  <!-- Google Fonts: Inter & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome 6 Icons via CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Outfit', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            nuA: '#EF4444', // Red-500
+            nuT: '#F59E0B', // Amber-500
+            nuU: '#8B5CF6', // Purple-500
+            nuG: '#3B82F6', // Blue-500
+            nuX: '#10B981', // Emerald-500
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom subtle animations and scrollbars */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.05);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(100, 116, 139, 0.35);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(100, 116, 139, 0.6);
+    }
+    .dna-bead {
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .dna-bead:hover {
+      transform: translateY(-2px) scale(1.05);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 0.9; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.03); }
+    }
+    .animate-pulse-subtle {
+      animation: pulse-glow 3s infinite ease-in-out;
+    }
+    .tab-active {
+      background: linear-gradient(135deg, #059669 0%, #0d9488 100%);
+      color: #ffffff !important;
+      box-shadow: 0 4px 14px -2px rgba(13, 148, 136, 0.45);
+    }
+  </style>
+</head>
+
+<body class="bg-slate-900 text-slate-100 min-h-screen font-sans antialiased selection:bg-teal-500 selection:text-white flex flex-col">
+
+  <!-- TOP HEADER -->
+  <header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur-md sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      
+      <!-- Brand & Title -->
+      <div class="flex items-center space-x-3.5">
+        <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-teal-500 to-emerald-400 flex items-center justify-center shadow-lg shadow-teal-500/20 ring-2 ring-teal-400/30">
+          <i class="fa-solid fa-dna text-slate-950 text-xl"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-teal-500/10 text-teal-400 border border-teal-500/20">Sinh Học 9</span>
+            <span class="text-xs text-slate-400">Chương trình SGK chuẩn</span>
+          </div>
+          <h1 class="text-lg sm:text-xl font-display font-extrabold text-white tracking-tight">
+            Phòng Thí Nghiệm Di Truyền Học Lớp 9
+          </h1>
+        </div>
+      </div>
+
+      <!-- Settings / Display toggles -->
+      <div class="flex items-center gap-3 self-end md:self-center">
+        <!-- Notation toggle (X vs C) -->
+        <div class="flex items-center bg-slate-800/80 rounded-xl p-1 border border-slate-700/60 text-xs">
+          <span class="px-2 text-slate-400 font-medium">Ký hiệu Nu:</span>
+          <button id="btnNotationX" onclick="setNuNotation('X')" class="px-2.5 py-1 rounded-lg font-semibold transition bg-teal-600 text-white shadow-sm">
+            X (SGK Việt Nam)
+          </button>
+          <button id="btnNotationC" onclick="setNuNotation('C')" class="px-2.5 py-1 rounded-lg font-semibold transition text-slate-400 hover:text-white">
+            C (Quốc tế)
+          </button>
+        </div>
+
+        <!-- Quick Help Modal button -->
+        <button onclick="openHelpModal()" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/60 transition" title="Hướng dẫn sử dụng">
+          <i class="fa-solid fa-circle-question text-base"></i>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- MAIN NAVIGATION TABS -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-1">
+      <nav class="flex space-x-2 border-b border-slate-800/80 overflow-x-auto pb-1" aria-label="Tabs">
+        <button id="tabBtn1" onclick="switchTab(1)" class="tab-active flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm transition whitespace-nowrap">
+          <i class="fa-solid fa-arrows-split-up-and-left text-base"></i>
+          <span>1. Mô phỏng Dịch mã (ADN ➔ Axit Amin)</span>
+        </button>
+        <button id="tabBtn2" onclick="switchTab(2)" class="flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition whitespace-nowrap">
+          <i class="fa-solid fa-calculator text-base"></i>
+          <span>2. Máy tính Công thức ADN (Giải chi tiết)</span>
+        </button>
+        <button id="tabBtn3" onclick="switchTab(3)" class="flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition whitespace-nowrap">
+          <i class="fa-solid fa-table-list text-base"></i>
+          <span>3. Bảng Tra cứu 20 Axit Amin</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- MAIN BODY CONTENT -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+    <!-- ================================================================= -->
+    <!-- TAB 1: MÔ PHỎNG DỊCH MÃ (ADN -> mARN -> AXIT AMIN) -->
+    <!-- ================================================================= -->
+    <section id="tabContent1" class="space-y-6">
+      
+      <!-- Top Overview Banner -->
+      <div class="bg-gradient-to-r from-teal-950/60 via-slate-900 to-indigo-950/60 border border-teal-800/40 rounded-2xl p-4 sm:p-5 shadow-xl">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div>
+            <div class="inline-flex items-center gap-2 text-xs font-semibold text-teal-400 uppercase tracking-wider mb-1">
+              <i class="fa-solid fa-microscope"></i> Cơ chế di truyền ở cấp độ phân tử
+            </div>
+            <h2 class="text-xl font-display font-bold text-white">Mô Phỏng Quá Trình Phiên Mã & Dịch Mã</h2>
+            <p class="text-slate-400 text-sm mt-0.5">
+              Từ mạch gốc ADN (3'➔5') tổng hợp phân tử mARN (5'➔3'), sau đó ribosome dịch các bộ ba mã sao (Codon) thành chuỗi polipeptit hoàn chỉnh.
+            </p>
+          </div>
+          <!-- Legend of Nucleotides -->
+          <div class="flex flex-wrap gap-2 text-xs font-mono font-bold self-start md:self-center">
+            <span class="px-2.5 py-1 rounded-lg bg-red-500/20 text-red-400 border border-red-500/30">A : Adenin</span>
+            <span class="px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-400 border border-amber-500/30">T : Timin</span>
+            <span class="px-2.5 py-1 rounded-lg bg-blue-500/20 text-blue-400 border border-blue-500/30">G : Guanin</span>
+            <span class="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 notation-x-label">X : Xitôzin</span>
+            <span class="px-2.5 py-1 rounded-lg bg-purple-500/20 text-purple-400 border border-purple-500/30">U : Uraxin</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Input Control Box -->
+      <div class="bg-slate-800/70 border border-slate-700/80 rounded-2xl p-5 shadow-lg space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <label for="dnaInput" class="font-display font-bold text-sm text-slate-200 flex items-center gap-2">
+            <i class="fa-solid fa-pen-nib text-teal-400"></i>
+            <span>Nhập chuỗi Mạch Gốc ADN (Chiều 3' ➔ 5')</span>
+            <span class="text-xs font-normal text-slate-400">(Chỉ chấp nhận A, T, G, X hoặc C)</span>
+          </label>
+          <div class="text-xs text-slate-400 font-mono">
+            Độ dài: <span id="dnaLengthBadge" class="text-teal-400 font-bold">0</span> Nu 
+            (<span id="codonCountBadge" class="text-indigo-400 font-bold">0</span> Codon)
+          </div>
+        </div>
+
+        <!-- Textarea input -->
+        <div class="relative">
+          <textarea id="dnaInput" rows="2" 
+            placeholder="Ví dụ: TACGGCTTAATGATCATT... (gõ hoặc chọn chuỗi mẫu bên dưới)"
+            class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-slate-100 font-mono text-base tracking-widest uppercase focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition resize-y"
+            oninput="handleDnaInput()"></textarea>
+          <button onclick="clearDnaInput()" class="absolute top-2.5 right-2.5 text-slate-400 hover:text-red-400 p-1.5 rounded-lg text-sm hover:bg-slate-800 transition" title="Xóa chuỗi">
+            <i class="fa-solid fa-eraser"></i>
+          </button>
+        </div>
+
+        <!-- Validation warning if error -->
+        <div id="dnaAlertBox" class="hidden p-3 rounded-xl text-xs font-medium flex items-center gap-2">
+          <!-- Dynamic error message -->
+        </div>
+
+        <!-- Presets and Controls Toolbar -->
+        <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="text-xs text-slate-400 font-semibold mr-1">Chuỗi mẫu sẵn:</span>
+            <button onclick="loadPreset('standard')" class="text-xs px-3 py-1.5 rounded-lg bg-slate-700/80 hover:bg-slate-700 text-slate-200 border border-slate-600/70 transition">
+              <i class="fa-solid fa-bookmark text-teal-400 mr-1"></i> Mẫu chuẩn SGK (18 Nu)
+            </button>
+            <button onclick="loadPreset('insulin')" class="text-xs px-3 py-1.5 rounded-lg bg-slate-700/80 hover:bg-slate-700 text-slate-200 border border-slate-600/70 transition">
+              <i class="fa-solid fa-vial-virus text-indigo-400 mr-1"></i> Đoạn gen Insulin (30 Nu)
+            </button>
+            <button onclick="loadPreset('random')" class="text-xs px-3 py-1.5 rounded-lg bg-slate-700/80 hover:bg-slate-700 text-slate-200 border border-slate-600/70 transition">
+              <i class="fa-solid fa-dice text-amber-400 mr-1"></i> Tạo ngẫu nhiên
+            </button>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button id="btnStepByStep" onclick="togglePlayback()" class="text-xs px-3 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-500 text-white font-semibold transition flex items-center gap-1.5 shadow-md shadow-teal-700/30">
+              <i id="playIcon" class="fa-solid fa-play"></i>
+              <span id="playText">Mô phỏng Ribosome chạy</span>
+            </button>
+            <button onclick="copyTranslationResult()" class="text-xs px-3 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200 transition" title="Sao chép kết quả chuỗi">
+              <i class="fa-regular fa-copy"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- VISUALIZATION CANVAS: 4 STREAMS -->
+      <div class="space-y-4">
+        
+        <!-- Stream 1: Mạch bổ sung ADN (5' - 3') -->
+        <div class="bg-slate-800/60 border border-slate-700/70 rounded-2xl p-4 transition">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full bg-amber-400"></span>
+              <h3 class="text-xs sm:text-sm font-semibold text-slate-200">1. Mạch Bổ Sung của ADN (Chiều 5' ➔ 3')</h3>
+            </div>
+            <span class="text-xs text-slate-400 font-mono">Nguyên tắc: A-T, T-A, G-X, X-G</span>
+          </div>
+          <div class="overflow-x-auto py-2">
+            <div id="strandComplementary" class="flex items-center gap-1 min-w-max font-mono text-sm">
+              <span class="text-slate-500 font-bold px-2">5' -</span>
+              <!-- Dynamically populated Nu beads -->
+              <span class="text-slate-500 italic text-xs py-2 px-3">(Nhập chuỗi ADN để xem mạch bổ sung)</span>
+              <span class="text-slate-500 font-bold px-2">- 3'</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hydrogen Bonds graphic connector -->
+        <div class="flex items-center justify-center -my-2 overflow-x-auto py-1">
+          <div id="strandHydrogenBonds" class="flex items-center gap-1 min-w-max text-[10px] text-slate-500 font-mono select-none">
+            <!-- Dynamically populated || or ||| -->
+          </div>
+        </div>
+
+        <!-- Stream 2: Mạch gốc ADN (3' - 5') -->
+        <div class="bg-slate-800/90 border border-teal-500/50 rounded-2xl p-4 ring-1 ring-teal-500/20 shadow-md">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full bg-teal-400 animate-ping"></span>
+              <h3 class="text-xs sm:text-sm font-semibold text-teal-300">2. Mạch Khuôn / Mạch Gốc ADN (Chiều 3' ➔ 5')</h3>
+            </div>
+            <span class="text-xs text-teal-400 font-mono">Mạch trực tiếp làm khuôn phiên mã</span>
+          </div>
+          <div class="overflow-x-auto py-2">
+            <div id="strandTemplate" class="flex items-center gap-1 min-w-max font-mono text-sm">
+              <span class="text-teal-400 font-bold px-2">3' -</span>
+              <!-- Dynamically populated Nu beads -->
+              <span class="text-slate-500 italic text-xs py-2 px-3">(Đang chờ dữ liệu...)</span>
+              <span class="text-teal-400 font-bold px-2">- 5'</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Transcription Arrow indicator -->
+        <div class="flex items-center justify-center text-teal-400 gap-2 font-medium text-xs py-1">
+          <i class="fa-solid fa-arrow-down-long animate-bounce"></i>
+          <span>Quá trình Phiên mã (ARN polimeraza) tổng hợp mARN theo NTBS: A➔U, T➔A, G➔X, X➔G</span>
+          <i class="fa-solid fa-arrow-down-long animate-bounce"></i>
+        </div>
+
+        <!-- Stream 3: Phân tử mARN (5' - 3') & Chia Codon -->
+        <div class="bg-slate-800/60 border border-purple-500/40 rounded-2xl p-4">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full bg-purple-400"></span>
+              <h3 class="text-xs sm:text-sm font-semibold text-purple-300">3. Phân tử mARN & Các Bộ Ba Codon (Chiều 5' ➔ 3')</h3>
+            </div>
+            <span class="text-xs text-purple-400 font-mono">Mỗi 3 Ribonu ghép thành 1 Codon</span>
+          </div>
+          <div class="overflow-x-auto py-2">
+            <div id="strandMrna" class="flex items-center gap-2 min-w-max font-mono text-sm">
+              <span class="text-purple-400 font-bold px-2">5' -</span>
+              <!-- Dynamically grouped into triplets / codons -->
+              <span class="text-slate-500 italic text-xs py-2 px-3">(Đang chờ chuỗi ADN...)</span>
+              <span class="text-purple-400 font-bold px-2">- 3'</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Translation Arrow indicator -->
+        <div class="flex items-center justify-center text-indigo-400 gap-2 font-medium text-xs py-1">
+          <i class="fa-solid fa-arrow-down-long"></i>
+          <span>Quá trình Dịch mã tại Ribôxôm (tARN vận chuyển tương ứng mã di truyền)</span>
+          <i class="fa-solid fa-arrow-down-long"></i>
+        </div>
+
+        <!-- Stream 4: Chuỗi Polipeptit (Protein) & 20 Axit Amin -->
+        <div class="bg-gradient-to-br from-slate-800/90 to-indigo-950/60 border border-indigo-500/50 rounded-2xl p-5 shadow-xl">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full bg-indigo-400"></span>
+              <h3 class="text-sm font-bold text-white">4. Chuỗi Polipeptit Hoàn Chỉnh (Protein)</h3>
+            </div>
+            <div class="flex items-center gap-3 text-xs">
+              <span class="flex items-center gap-1.5 text-emerald-400 font-medium">
+                <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Bộ ba mở đầu (AUG)
+              </span>
+              <span class="flex items-center gap-1.5 text-red-400 font-medium">
+                <span class="w-2 h-2 rounded-full bg-red-400"></span> Bộ ba kết thúc (UAA/UAG/UGA)
+              </span>
+            </div>
+          </div>
+
+          <!-- Peptide Chain visualization container -->
+          <div class="overflow-x-auto py-3">
+            <div id="peptideChainContainer" class="flex items-center gap-3 min-w-max">
+              <span class="text-indigo-400 font-bold font-mono text-xs px-2">N-đầu [</span>
+              <span class="text-slate-500 italic text-xs py-2 px-3">(Chuỗi axit amin sẽ hiển thị tại đây)</span>
+              <span class="text-indigo-400 font-bold font-mono text-xs px-2">] C-đuôi</span>
+            </div>
+          </div>
+
+          <!-- Translation Summary Card -->
+          <div id="translationStatsCard" class="mt-4 pt-4 border-t border-slate-700/60 grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+            <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800">
+              <div class="text-xs text-slate-400">Số Nu ADN (gốc)</div>
+              <div id="statDnaNu" class="text-lg font-bold font-mono text-teal-400">0</div>
+            </div>
+            <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800">
+              <div class="text-xs text-slate-400">Số Ribonu mARN</div>
+              <div id="statRnaNu" class="text-lg font-bold font-mono text-purple-400">0</div>
+            </div>
+            <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800">
+              <div class="text-xs text-slate-400">Số Codon tổng</div>
+              <div id="statCodonTotal" class="text-lg font-bold font-mono text-indigo-400">0</div>
+            </div>
+            <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800">
+              <div class="text-xs text-slate-400">Số Axit Amin mã hóa</div>
+              <div id="statAminoAcids" class="text-lg font-bold font-mono text-emerald-400">0</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Quick Explanation Accordion -->
+      <div class="bg-slate-800/40 border border-slate-700/50 rounded-2xl p-4 text-xs sm:text-sm text-slate-300 space-y-2">
+        <div class="font-bold text-slate-200 flex items-center gap-2">
+          <i class="fa-solid fa-lightbulb text-amber-400"></i>
+          <span>Kiến thức trọng tâm Sinh học 9 cần ghi nhớ:</span>
+        </div>
+        <ul class="list-disc list-inside space-y-1 text-slate-400">
+          <li><strong>Nguyên tắc bổ sung (NTBS):</strong> Trong phân tử ADN, A liên kết với T bằng 2 liên kết hiđrô, G liên kết với X bằng 3 liên kết hiđrô.</li>
+          <li><strong>Phiên mã:</strong> Diễn ra trong nhân tế bào, enzym ARN-polimeraza tổng hợp mARN từ mạch gốc 3'➔5' của gen (A gốc ghép U; T gốc ghép A; G gốc ghép X; X gốc ghép G).</li>
+          <li><strong>Mã mở đầu:</strong> <code class="text-emerald-400 bg-slate-900 px-1 py-0.5 rounded">AUG</code> (quy định Axit amin Metionin - Met).</li>
+          <li><strong>Mã kết thúc:</strong> <code class="text-red-400 bg-slate-900 px-1 py-0.5 rounded">UAA</code>, <code class="text-red-400 bg-slate-900 px-1 py-0.5 rounded">UAG</code>, <code class="text-red-400 bg-slate-900 px-1 py-0.5 rounded">UGA</code> (không quy định axit amin nào, báo hiệu kết thúc dịch mã).</li>
+        </ul>
+      </div>
+
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- TAB 2: MÁY TÍNH CÔNG THỨC SINH HỌC 9 (GIẢI BÀI TẬP ADN) -->
+    <!-- ================================================================= -->
+    <section id="tabContent2" class="hidden space-y-6">
+      
+      <!-- Sub-tab selector: Dạng 1 (Thuận) vs Dạng 2 (Ngược) vs Công thức tham khảo -->
+      <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-800/60 p-2 rounded-2xl border border-slate-700/70">
+        <div class="flex space-x-1 sm:space-x-2">
+          <button id="subTabCalc1" onclick="switchCalcMode('direct')" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition bg-teal-600 text-white shadow-md">
+            <i class="fa-solid fa-calculator mr-1"></i> Dạng 1: Bài toán Thuận (Biết A, G)
+          </button>
+          <button id="subTabCalc2" onclick="switchCalcMode('inverse')" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition text-slate-400 hover:text-white hover:bg-slate-700/50">
+            <i class="fa-solid fa-rotate mr-1"></i> Dạng 2: Bài toán Ngược (Biết N & H, L & H...)
+          </button>
+          <button id="subTabCalc3" onclick="switchCalcMode('cheatsheet')" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition text-slate-400 hover:text-white hover:bg-slate-700/50">
+            <i class="fa-solid fa-book-bookmark mr-1"></i> Bảng công thức SGK
+          </button>
+        </div>
+      </div>
+
+      <!-- DẠNG 1: BÀI TOÁN THUẬN -->
+      <div id="calcDirectView" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Input Panel Left -->
+        <div class="lg:col-span-4 bg-slate-800/70 border border-slate-700/80 rounded-2xl p-5 space-y-4 shadow-lg h-fit">
+          <div class="border-b border-slate-700/60 pb-3">
+            <h3 class="font-display font-bold text-white text-base flex items-center gap-2">
+              <i class="fa-solid fa-sliders text-teal-400"></i> Nhập Thông Số Đề Bài
+            </h3>
+            <p class="text-xs text-slate-400 mt-1">Nhập số lượng nuclêôtit loại A và G của gen.</p>
+          </div>
+
+          <!-- Input Mode Choice (Số lượng vs Phần trăm) -->
+          <div class="space-y-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1 flex items-center justify-between">
+                <span>Số nuclêôtit loại A (hoặc T):</span>
+                <span class="text-red-400 font-mono text-[11px]">A = T</span>
+              </label>
+              <div class="relative">
+                <input type="number" id="inputNuA" value="600" min="0" step="1" 
+                  class="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white font-mono text-base focus:ring-2 focus:ring-teal-500 focus:outline-none"
+                  oninput="calculateDirect()" placeholder="Ví dụ: 600">
+                <span class="absolute right-3 top-3 text-xs text-slate-400 font-mono">Nu</span>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1 flex items-center justify-between">
+                <span class="notation-x-label">Số nuclêôtit loại G (hoặc X):</span>
+                <span class="text-emerald-400 font-mono text-[11px] notation-x-eq">G = X</span>
+              </label>
+              <div class="relative">
+                <input type="number" id="inputNuG" value="900" min="0" step="1" 
+                  class="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white font-mono text-base focus:ring-2 focus:ring-teal-500 focus:outline-none"
+                  oninput="calculateDirect()" placeholder="Ví dụ: 900">
+                <span class="absolute right-3 top-3 text-xs text-slate-400 font-mono">Nu</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sample Quick Presets for Homework -->
+          <div class="pt-2 border-t border-slate-700/60 space-y-2">
+            <span class="text-xs text-slate-400 font-semibold block">Ví dụ mẫu bài tập SGK:</span>
+            <div class="grid grid-cols-2 gap-2">
+              <button onclick="setDirectPreset(600, 900)" class="text-xs p-2 rounded-xl bg-slate-700/60 hover:bg-slate-700 text-slate-200 text-left transition border border-slate-600/50">
+                <div class="font-bold text-teal-300">Bài 1 SGK</div>
+                <div class="text-[11px] text-slate-400">A=600, G=900</div>
+              </button>
+              <button onclick="setDirectPreset(450, 1050)" class="text-xs p-2 rounded-xl bg-slate-700/60 hover:bg-slate-700 text-slate-200 text-left transition border border-slate-600/50">
+                <div class="font-bold text-indigo-300">Bài thi HK1</div>
+                <div class="text-[11px] text-slate-400">A=450, G=1050</div>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Output Cards & Step-by-Step Right -->
+        <div class="lg:col-span-8 space-y-5">
+          
+          <!-- Key Metrics Grid -->
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            
+            <!-- N -->
+            <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-4 shadow">
+              <div class="flex items-center justify-between text-xs text-slate-400 mb-1">
+                <span>Tổng số Nu (N)</span>
+                <i class="fa-solid fa-cubes text-teal-400"></i>
+              </div>
+              <div id="resTotalNu" class="text-2xl font-bold font-mono text-white">3,000</div>
+              <div class="text-[11px] text-slate-500 font-mono mt-0.5">N = 2A + 2G</div>
+            </div>
+
+            <!-- H -->
+            <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-4 shadow">
+              <div class="flex items-center justify-between text-xs text-slate-400 mb-1">
+                <span>Liên kết Hiđrô (H)</span>
+                <i class="fa-solid fa-link text-amber-400"></i>
+              </div>
+              <div id="resHydro" class="text-2xl font-bold font-mono text-amber-400">3,900</div>
+              <div class="text-[11px] text-slate-500 font-mono mt-0.5">H = 2A + 3G</div>
+            </div>
+
+            <!-- Length L -->
+            <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-4 shadow">
+              <div class="flex items-center justify-between text-xs text-slate-400 mb-1">
+                <span>Chiều dài (L)</span>
+                <i class="fa-solid fa-ruler-horizontal text-indigo-400"></i>
+              </div>
+              <div id="resLength" class="text-2xl font-bold font-mono text-indigo-400">5,100 Å</div>
+              <div id="resLengthAlt" class="text-[11px] text-slate-400 font-mono mt-0.5">= 510 nm = 0.51 µm</div>
+            </div>
+
+            <!-- Mass M -->
+            <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-4 shadow">
+              <div class="flex items-center justify-between text-xs text-slate-400 mb-1">
+                <span>Khối lượng (M)</span>
+                <i class="fa-solid fa-weight-scale text-purple-400"></i>
+              </div>
+              <div id="resMass" class="text-2xl font-bold font-mono text-purple-400">900,000</div>
+              <div class="text-[11px] text-slate-500 font-mono mt-0.5">đvC (M = N × 300)</div>
+            </div>
+
+            <!-- Turn C -->
+            <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-4 shadow">
+              <div class="flex items-center justify-between text-xs text-slate-400 mb-1">
+                <span>Chu kỳ xoắn (C)</span>
+                <i class="fa-solid fa-rotate text-emerald-400"></i>
+              </div>
+              <div id="resCycles" class="text-2xl font-bold font-mono text-emerald-400">150</div>
+              <div class="text-[11px] text-slate-500 font-mono mt-0.5">chu kỳ (C = N / 20)</div>
+            </div>
+
+            <!-- Covalent bonds -->
+            <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-4 shadow">
+              <div class="flex items-center justify-between text-xs text-slate-400 mb-1">
+                <span>Liên kết hóa trị (Y)</span>
+                <i class="fa-solid fa-atom text-cyan-400"></i>
+              </div>
+              <div id="resCovalent" class="text-2xl font-bold font-mono text-cyan-400">2,998</div>
+              <div class="text-[11px] text-slate-400 font-mono mt-0.5">Giữa các Nu: N - 2</div>
+            </div>
+
+          </div>
+
+          <!-- Step by step Detailed Solution -->
+          <div class="bg-slate-800/70 border border-slate-700/80 rounded-2xl p-5 shadow-lg space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-700/60 pb-3">
+              <h4 class="font-display font-bold text-white text-base flex items-center gap-2">
+                <i class="fa-solid fa-graduation-cap text-teal-400"></i> Lời Giải Chi Tiết Từng Bước (Chuẩn Trình Bày Bài Thi)
+              </h4>
+              <button onclick="copySolution('directSolutionText')" class="text-xs px-2.5 py-1 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300 transition flex items-center gap-1">
+                <i class="fa-regular fa-copy"></i> Copy lời giải
+              </button>
+            </div>
+            
+            <div id="directSolutionText" class="font-mono text-xs sm:text-sm text-slate-300 space-y-3 leading-relaxed bg-slate-900/80 p-4 rounded-xl border border-slate-800">
+              <!-- Dynamically populated solution text -->
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- DẠNG 2: BÀI TOÁN NGƯỢC -->
+      <div id="calcInverseView" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Input Panel Left -->
+        <div class="lg:col-span-4 bg-slate-800/70 border border-slate-700/80 rounded-2xl p-5 space-y-4 shadow-lg h-fit">
+          <div class="border-b border-slate-700/60 pb-3">
+            <h3 class="font-display font-bold text-white text-base flex items-center gap-2">
+              <i class="fa-solid fa-puzzle-piece text-indigo-400"></i> Chọn Dạng Đề Bài Ngược
+            </h3>
+            <p class="text-xs text-slate-400 mt-1">Hệ thống sẽ lập hệ phương trình để giải ra A, T, G, X.</p>
+          </div>
+
+          <!-- Select type of inverse problem -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1.5">Giả thiết đã cho:</label>
+            <select id="inverseTypeSelect" onchange="changeInverseInputType()" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-slate-200 text-xs font-semibold focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+              <option value="N_H">1. Biết Tổng số Nu (N) và Liên kết Hiđrô (H)</option>
+              <option value="L_H">2. Biết Chiều dài gen (L) và Liên kết Hiđrô (H)</option>
+              <option value="C_H">3. Biết Số chu kỳ xoắn (C) và Liên kết Hiđrô (H)</option>
+              <option value="N_pctA">4. Biết Tổng số Nu (N) và % Nu loại A (hoặc T)</option>
+            </select>
+          </div>
+
+          <!-- Dynamic input fields -->
+          <div id="inverseInputContainer" class="space-y-3">
+            <!-- Populated via JS -->
+          </div>
+
+          <!-- Presets for inverse problems -->
+          <div class="pt-2 border-t border-slate-700/60 space-y-2">
+            <span class="text-xs text-slate-400 font-semibold block">Đề bài thi mẫu:</span>
+            <div class="grid grid-cols-2 gap-2">
+              <button onclick="setInversePreset('N_H', 3000, 3900)" class="text-xs p-2 rounded-xl bg-slate-700/60 hover:bg-slate-700 text-slate-200 text-left transition border border-slate-600/50">
+                <div class="font-bold text-indigo-300">Đề HK1 (N, H)</div>
+                <div class="text-[11px] text-slate-400">N=3000, H=3900</div>
+              </button>
+              <button onclick="setInversePreset('L_H', 4080, 3120)" class="text-xs p-2 rounded-xl bg-slate-700/60 hover:bg-slate-700 text-slate-200 text-left transition border border-slate-600/50">
+                <div class="font-bold text-teal-300">Đề HSG (L, H)</div>
+                <div class="text-[11px] text-slate-400">L=4080 Å, H=3120</div>
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Output & Equation Solver Right -->
+        <div class="lg:col-span-8 space-y-5">
+          
+          <!-- Solver Result Summary Badge -->
+          <div id="inverseAlertBox" class="p-4 rounded-2xl border bg-slate-800/80 border-slate-700 text-slate-200">
+            <!-- Dynamic status or error -->
+          </div>
+
+          <!-- 4 Nu Count Results Grid -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            
+            <div class="bg-slate-800/80 border border-red-500/30 rounded-2xl p-4 text-center">
+              <span class="text-xs text-red-400 font-bold uppercase">Nu loại A</span>
+              <div id="invResA" class="text-2xl font-bold font-mono text-white mt-1">600</div>
+              <div id="invResPctA" class="text-[11px] text-slate-400 font-mono mt-0.5">(20.0%)</div>
+            </div>
+
+            <div class="bg-slate-800/80 border border-amber-500/30 rounded-2xl p-4 text-center">
+              <span class="text-xs text-amber-400 font-bold uppercase">Nu loại T</span>
+              <div id="invResT" class="text-2xl font-bold font-mono text-white mt-1">600</div>
+              <div id="invResPctT" class="text-[11px] text-slate-400 font-mono mt-0.5">(20.0%)</div>
+            </div>
+
+            <div class="bg-slate-800/80 border border-blue-500/30 rounded-2xl p-4 text-center">
+              <span class="text-xs text-blue-400 font-bold uppercase">Nu loại G</span>
+              <div id="invResG" class="text-2xl font-bold font-mono text-white mt-1">900</div>
+              <div id="invResPctG" class="text-[11px] text-slate-400 font-mono mt-0.5">(30.0%)</div>
+            </div>
+
+            <div class="bg-slate-800/80 border border-emerald-500/30 rounded-2xl p-4 text-center">
+              <span class="text-xs text-emerald-400 font-bold uppercase notation-x-pure">Nu loại X</span>
+              <div id="invResX" class="text-2xl font-bold font-mono text-white mt-1">900</div>
+              <div id="invResPctX" class="text-[11px] text-slate-400 font-mono mt-0.5">(30.0%)</div>
+            </div>
+
+          </div>
+
+          <!-- Step-by-step Inverse derivation -->
+          <div class="bg-slate-800/70 border border-slate-700/80 rounded-2xl p-5 shadow-lg space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-700/60 pb-3">
+              <h4 class="font-display font-bold text-white text-base flex items-center gap-2">
+                <i class="fa-solid fa-square-root-variable text-indigo-400"></i> Các Bước Giải Hệ Phương Trình Chi Tiết
+              </h4>
+              <button onclick="copySolution('inverseSolutionText')" class="text-xs px-2.5 py-1 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300 transition flex items-center gap-1">
+                <i class="fa-regular fa-copy"></i> Copy lời giải
+              </button>
+            </div>
+            
+            <div id="inverseSolutionText" class="font-mono text-xs sm:text-sm text-slate-300 space-y-3 leading-relaxed bg-slate-900/80 p-4 rounded-xl border border-slate-800">
+              <!-- Dynamically populated math steps -->
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- BẢNG TỔNG HỢP CÔNG THỨC SGK SINH 9 -->
+      <div id="calcCheatsheetView" class="hidden space-y-4">
+        <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-6 shadow-xl space-y-6">
+          <div class="border-b border-slate-700/60 pb-3">
+            <h3 class="text-lg font-display font-bold text-white flex items-center gap-2">
+              <i class="fa-solid fa-book-open text-teal-400"></i> Cẩm Nang Công Thức ADN & Gen Lớp 9 Toàn Diện
+            </h3>
+            <p class="text-xs sm:text-sm text-slate-400 mt-1">
+              Bảng công thức quy chuẩn theo chương trình Sinh học lớp 9, ghi nhớ để làm bài kiểm tra và thi tuyển sinh vào lớp 10.
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-xs sm:text-sm">
+            
+            <!-- Card 1: Số lượng và % Nu -->
+            <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-xl space-y-2">
+              <span class="font-bold text-teal-400 flex items-center gap-1.5">
+                <i class="fa-solid fa-1"></i> Số lượng & Tỉ lệ % Nuclêôtit
+              </span>
+              <ul class="space-y-1.5 text-slate-300 font-mono text-xs">
+                <li>• Theo NTBS: <span class="text-white font-bold">A = T</span> ; <span class="text-white font-bold">G = X</span></li>
+                <li>• Tổng số Nu: <span class="text-teal-300">N = 2A + 2G = 2T + 2X</span></li>
+                <li>• Số Nu mỗi mạch: <span class="text-teal-300">N/2 = A + G = T + X</span></li>
+                <li>• Tỉ lệ phần trăm: <span class="text-teal-300">%A + %G = 50% = N/2</span></li>
+                <li>• <span class="text-teal-300">%A = %T = (A / N) × 100%</span></li>
+                <li>• <span class="text-teal-300">%G = %X = (G / N) × 100%</span></li>
+              </ul>
+            </div>
+
+            <!-- Card 2: Chiều dài & Chu kỳ xoắn -->
+            <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-xl space-y-2">
+              <span class="font-bold text-indigo-400 flex items-center gap-1.5">
+                <i class="fa-solid fa-2"></i> Chiều dài & Chu kỳ xoắn
+              </span>
+              <ul class="space-y-1.5 text-slate-300 font-mono text-xs">
+                <li>• Mỗi Nu dài: <span class="text-white">3.4 Å (Ăng-xtrông)</span></li>
+                <li>• Chiều dài gen: <span class="text-indigo-300">L = (N / 2) × 3.4 Å</span></li>
+                <li>• Đổi đơn vị:
+                  <div class="pl-2 text-slate-400">1 nm = 10 Å | 1 µm = 10,000 Å</div>
+                </li>
+                <li>• 1 Chu kỳ xoắn: gồm 10 cặp Nu = 20 Nu, dài 34 Å</li>
+                <li>• Số chu kỳ xoắn: <span class="text-indigo-300">C = N / 20 = L / 34</span></li>
+              </ul>
+            </div>
+
+            <!-- Card 3: Khối lượng & Liên kết -->
+            <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-xl space-y-2">
+              <span class="font-bold text-amber-400 flex items-center gap-1.5">
+                <i class="fa-solid fa-3"></i> Khối lượng & Các Liên Kết
+              </span>
+              <ul class="space-y-1.5 text-slate-300 font-mono text-xs">
+                <li>• Khối lượng trung bình 1 Nu: <span class="text-white">300 đvC</span></li>
+                <li>• Khối lượng gen: <span class="text-amber-300">M = N × 300 đvC</span></li>
+                <li>• Liên kết Hiđrô: <span class="text-amber-300">H = 2A + 3G = 2T + 3X</span></li>
+                <li>• LK hóa trị giữa các Nu: <span class="text-amber-300">Y = N - 2</span></li>
+                <li>• Tổng LK hóa trị cả gen: <span class="text-amber-300">2N - 2</span></li>
+              </ul>
+            </div>
+
+            <!-- Card 4: Quan hệ mạch đơn ADN -->
+            <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-xl space-y-2">
+              <span class="font-bold text-emerald-400 flex items-center gap-1.5">
+                <i class="fa-solid fa-4"></i> Tương quan giữa 2 mạch ADN
+              </span>
+              <ul class="space-y-1.5 text-slate-300 font-mono text-xs">
+                <li>• <span class="text-emerald-300">A1 = T2</span> ; <span class="text-emerald-300">T1 = A2</span></li>
+                <li>• <span class="text-emerald-300">G1 = X2</span> ; <span class="text-emerald-300">X1 = G2</span></li>
+                <li>• <span class="text-emerald-300">A = T = A1 + A2 = T1 + T2</span></li>
+                <li>• <span class="text-emerald-300">G = X = G1 + G2 = X1 + X2</span></li>
+                <li>• <span class="text-emerald-300">%A = (%A1 + %A2) / 2</span></li>
+              </ul>
+            </div>
+
+            <!-- Card 5: Phiên mã & Dịch mã -->
+            <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-xl space-y-2">
+              <span class="font-bold text-purple-400 flex items-center gap-1.5">
+                <i class="fa-solid fa-5"></i> Phiên Mã & Dịch Mã
+              </span>
+              <ul class="space-y-1.5 text-slate-300 font-mono text-xs">
+                <li>• Số Ribonu mARN: <span class="text-purple-300">rN = N / 2</span></li>
+                <li>• Chiều dài mARN: <span class="text-purple-300">LmARN = Lgen = rN × 3.4 Å</span></li>
+                <li>• Số bộ ba (Codon): <span class="text-purple-300">rN / 3 = N / 6</span></li>
+                <li>• Số axit amin cung cấp: <span class="text-purple-300">(rN / 3) - 1</span></li>
+                <li>• Số axit amin protein hoàn chỉnh: <span class="text-purple-300">(rN / 3) - 2</span> (đã cắt Met mở đầu)</li>
+              </ul>
+            </div>
+
+            <!-- Card 6: Nhân đôi ADN -->
+            <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-xl space-y-2">
+              <span class="font-bold text-cyan-400 flex items-center gap-1.5">
+                <i class="fa-solid fa-6"></i> Nhân Đôi ADN (k lần)
+              </span>
+              <ul class="space-y-1.5 text-slate-300 font-mono text-xs">
+                <li>• Số ADN con tạo thành: <span class="text-cyan-300">2^k phân tử</span></li>
+                <li>• Số ADN con có 2 mạch mới hoàn toàn: <span class="text-cyan-300">2^k - 2</span></li>
+                <li>• Nu môi trường cung cấp: <span class="text-cyan-300">N_mt = N × (2^k - 1)</span></li>
+                <li>• Nu loại A_mt cung cấp: <span class="text-cyan-300">A_mt = A × (2^k - 1)</span></li>
+                <li>• Nu loại G_mt cung cấp: <span class="text-cyan-300">G_mt = G × (2^k - 1)</span></li>
+              </ul>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- TAB 3: BẢNG TRA CỨU TƯƠNG TÁC 20 AXIT AMIN -->
+    <!-- ================================================================= -->
+    <section id="tabContent3" class="hidden space-y-6">
+      
+      <!-- Top Search & Filter Bar -->
+      <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-4 sm:p-5 shadow-lg space-y-4">
+        
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div>
+            <h2 class="text-lg sm:text-xl font-display font-bold text-white flex items-center gap-2">
+              <i class="fa-solid fa-flask-vial text-teal-400"></i> Bảng Tra Cứu 20 Axit Amin Tiêu Chuẩn
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-400">
+              Tra cứu nhanh theo tên tiếng Việt/Anh, mã viết tắt 3 chữ cái, hoặc gõ một codon bất kỳ (ví dụ: <span class="text-teal-400 font-mono">AUG, UUU, GAG</span>) để tìm axit amin.
+            </p>
+          </div>
+          
+          <!-- Quick stats count -->
+          <div class="text-xs font-mono text-slate-400 self-start md:self-center">
+            Hiển thị: <span id="aminoMatchCount" class="text-teal-400 font-bold text-sm">21</span> / 21 mục
+          </div>
+        </div>
+
+        <!-- Search Input -->
+        <div class="relative">
+          <i class="fa-solid fa-magnifying-glass absolute left-4 top-3.5 text-slate-400 text-sm"></i>
+          <input type="text" id="aminoSearchInput" 
+            placeholder="Tìm theo tên (Alanine, Metionin...), viết tắt (Ala, Met, M), hoặc Codon (AUG, UAA...)" 
+            class="w-full pl-11 pr-10 py-3 bg-slate-900 border border-slate-700 rounded-xl text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
+            oninput="filterAminoCards()">
+          <button onclick="clearAminoSearch()" class="absolute right-3 top-3 text-slate-400 hover:text-white p-1 rounded-lg text-sm" title="Xóa tìm kiếm">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <!-- Filter Tags / Categories -->
+        <div class="flex flex-wrap items-center gap-2 pt-1">
+          <span class="text-xs text-slate-400 font-semibold mr-1">Nhóm tính chất:</span>
+          
+          <button onclick="setAminoCategory('all')" id="catBtn-all" class="text-xs px-3 py-1.5 rounded-lg bg-teal-600 text-white font-medium transition shadow-sm">
+            Tất cả (20 + Stop)
+          </button>
+          
+          <button onclick="setAminoCategory('hydrophobic')" id="catBtn-hydrophobic" class="text-xs px-3 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300 font-medium transition">
+            Kị nước (Không phân cực)
+          </button>
+          
+          <button onclick="setAminoCategory('polar')" id="catBtn-polar" class="text-xs px-3 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300 font-medium transition">
+            Ưa nước (Phân cực)
+          </button>
+
+          <button onclick="setAminoCategory('positive')" id="catBtn-positive" class="text-xs px-3 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300 font-medium transition">
+            Tích điện dương (Bazơ)
+          </button>
+
+          <button onclick="setAminoCategory('negative')" id="catBtn-negative" class="text-xs px-3 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300 font-medium transition">
+            Tích điện âm (Axit)
+          </button>
+
+          <button onclick="setAminoCategory('special')" id="catBtn-special" class="text-xs px-3 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300 font-medium transition">
+            Mã đặc biệt (Mở đầu / Kết thúc)
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Amino Cards Grid -->
+      <div id="aminoCardsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <!-- Dynamically rendered amino cards -->
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- MODAL: AMINO ACID DETAIL VIEW -->
+  <div id="aminoDetailModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+    <div class="bg-slate-900 border border-slate-700 rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4 relative transform transition-all">
+      <button onclick="closeAminoModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white p-2 rounded-xl hover:bg-slate-800 transition">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+
+      <div id="aminoModalContent">
+        <!-- Dynamically populated via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: HELP & USER GUIDE -->
+  <div id="helpModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+    <div class="bg-slate-900 border border-slate-700 rounded-3xl max-w-xl w-full p-6 shadow-2xl space-y-4 relative max-h-[90vh] overflow-y-auto">
+      <button onclick="closeHelpModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white p-2 rounded-xl hover:bg-slate-800 transition">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+
+      <div class="flex items-center gap-3 border-b border-slate-800 pb-3">
+        <div class="w-10 h-10 rounded-xl bg-teal-500/20 text-teal-400 flex items-center justify-center text-lg">
+          <i class="fa-solid fa-circle-info"></i>
+        </div>
+        <div>
+          <h3 class="font-display font-bold text-lg text-white">Hướng Dẫn Sử Dụng Phòng Thí Nghiệm</h3>
+          <p class="text-xs text-slate-400">Ứng dụng hỗ trợ học tập Sinh học lớp 9</p>
+        </div>
+      </div>
+
+      <div class="text-xs sm:text-sm text-slate-300 space-y-3 leading-relaxed">
+        <div>
+          <h4 class="font-bold text-teal-400 mb-1">1. Tab 1 - Mô phỏng Dịch mã:</h4>
+          <p>Nhập chuỗi ADN mạch gốc (chiều 3'➔5'). Bạn có thể gõ chữ thường hoặc hoa, hệ thống tự động chuẩn hóa. Nếu gõ ký tự lạ (khác A, T, G, X, C) chương trình sẽ báo đỏ ngay. Bấm nút "Mô phỏng Ribosome chạy" để xem hiệu ứng dịch mã từng bước!</p>
+        </div>
+        <div>
+          <h4 class="font-bold text-indigo-400 mb-1">2. Tab 2 - Máy tính ADN:</h4>
+          <p>Có 2 chế độ: <strong>Bài toán thuận</strong> (nhập A và G để tính N, L, M, H, C, liên kết hóa trị kèm lời giải) và <strong>Bài toán ngược</strong> (nhập N và H, hoặc L và H để giải hệ phương trình tìm số lượng từng loại Nu).</p>
+        </div>
+        <div>
+          <h4 class="font-bold text-amber-400 mb-1">3. Tab 3 - Bảng 20 Axit Amin:</h4>
+          <p>Gõ bất kỳ codon nào (ví dụ gõ <code class="text-teal-300">AUG</code> hoặc <code class="text-teal-300">UAA</code>) hoặc tên tiếng Việt vào ô tìm kiếm để tra nhanh thông tin, công thức và vai trò của axit amin đó.</p>
+        </div>
+      </div>
+
+      <div class="pt-2 border-t border-slate-800 flex justify-end">
+        <button onclick="closeHelpModal()" class="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-semibold text-xs transition">
+          Đã hiểu, đóng hướng dẫn
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="toastNotification" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none flex items-center gap-2.5 px-4 py-3 rounded-xl bg-slate-800 border border-teal-500/50 text-white text-xs font-semibold shadow-2xl">
+    <i class="fa-solid fa-circle-check text-teal-400 text-sm"></i>
+    <span id="toastMessage">Đã sao chép vào bộ nhớ tạm!</span>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-slate-800/80 bg-slate-950/60 py-4 mt-8 text-center text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+      <div class="flex items-center gap-2">
+        <i class="fa-solid fa-atom text-teal-400"></i>
+        <span>Phòng Thí Nghiệm Di Truyền Học 9 • Hoàn toàn chạy offline không cần mạng</span>
+      </div>
+      <div>
+        <span>Dành cho học sinh & giáo viên ôn thi vào 10 chuyên & đại trà</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ================================================================= -->
+  <!-- JAVASCRIPT LOGIC ENGINE -->
+  <!-- ================================================================= -->
+  <script>
+    /* ===================================================================
+       1. GLOBAL STATE & GENETIC CODE DICTIONARY
+       =================================================================== */
+    let currentNotation = 'X'; // 'X' for SGK VN, 'C' for International
+    let activeTab = 1;
+    let playbackInterval = null;
+    let isPlaying = false;
+    let currentStepCodonIndex = -1;
+    let selectedAminoCategory = 'all';
+
+    // 20 Standard Amino Acids + Stop Codons Database
+    const AMINO_ACID_DATABASE = [
+      {
+        code3: "Met", code1: "M", nameVi: "Metionin", nameEn: "Methionine",
+        category: "special", categoryLabel: "Mã mở đầu (Đặc biệt)",
+        color: "emerald",
+        codons: ["AUG"],
+        desc: "Axit amin mở đầu chuỗi polipeptit ở sinh vật nhân thực. Chứa nguyên tử lưu huỳnh (S). Ở sinh vật nhân sơ là Formyl-metionin (fMet).",
+        molWeight: 149.2, formula: "C5H11NO2S", polarity: "Không phân cực / Kị nước"
+      },
+      {
+        code3: "Ala", code1: "A", nameVi: "Alanin", nameEn: "Alanine",
+        category: "hydrophobic", categoryLabel: "Kị nước (Không phân cực)",
+        color: "blue",
+        codons: ["GCU", "GCC", "GCA", "GCG"],
+        desc: "Axit amin nhỏ gọn, cấu trúc chuỗi bên là gốc metyl (-CH3), rất phổ biến trong các chuỗi xoắn alpha của protein.",
+        molWeight: 89.1, formula: "C3H7NO2", polarity: "Không phân cực"
+      },
+      {
+        code3: "Val", code1: "V", nameVi: "Valin", nameEn: "Valine",
+        category: "hydrophobic", categoryLabel: "Kị nước (Không phân cực)",
+        color: "blue",
+        codons: ["GUU", "GUC", "GUA", "GUG"],
+        desc: "Axit amin thiết yếu chuỗi nhánh (BCAA), cơ thể người không tự tổng hợp được mà phải lấy qua thức ăn.",
+        molWeight: 117.1, formula: "C5H11NO2", polarity: "Không phân cực"
+      },
+      {
+        code3: "Leu", code1: "L", nameVi: "Lơxin", nameEn: "Leucine",
+        category: "hydrophobic", categoryLabel: "Kị nước (Không phân cực)",
+        color: "blue",
+        codons: ["UUA", "UUG", "CUU", "CUC", "CUA", "CUG"],
+        desc: "Axit amin thiết yếu có tới 6 bộ ba codon mã hóa. Đóng vai trò quan trọng trong kích thích tổng hợp protein cơ bắp.",
+        molWeight: 131.2, formula: "C6H13NO2", polarity: "Không phân cực"
+      },
+      {
+        code3: "Ile", code1: "I", nameVi: "Izolơxin", nameEn: "Isoleucine",
+        category: "hydrophobic", categoryLabel: "Kị nước (Không phân cực)",
+        color: "blue",
+        codons: ["AUU", "AUC", "AUA"],
+        desc: "Đồng phân cấu tạo của Leucine, axit amin thiết yếu chuỗi nhánh tham gia vào cấu trúc lõi kị nước của protein.",
+        molWeight: 131.2, formula: "C6H13NO2", polarity: "Không phân cực"
+      },
+      {
+        code3: "Pro", code1: "P", nameVi: "Prolin", nameEn: "Proline",
+        category: "hydrophobic", categoryLabel: "Cấu trúc vòng đặc biệt",
+        color: "slate",
+        codons: ["CCU", "CCC", "CCA", "CCG"],
+        desc: "Axit amin duy nhất có nhóm amin bậc hai tạo vòng khép kín với mạch cacbon, thường tạo các khúc gập trong chuỗi protein.",
+        molWeight: 115.1, formula: "C5H9NO2", polarity: "Không phân cực"
+      },
+      {
+        code3: "Phe", code1: "F", nameVi: "Phenylalanin", nameEn: "Phenylalanine",
+        category: "hydrophobic", categoryLabel: "Kị nước / Vòng thơm",
+        color: "cyan",
+        codons: ["UUU", "UUC"],
+        desc: "Axit amin thiết yếu có vòng benzen thơm. Là tiền chất để tổng hợp Tyrosine và các chất dẫn truyền thần kinh dopamine.",
+        molWeight: 165.2, formula: "C9H11NO2", polarity: "Không phân cực"
+      },
+      {
+        code3: "Trp", code1: "W", nameVi: "Triptofan", nameEn: "Tryptophan",
+        category: "hydrophobic", categoryLabel: "Kị nước / Vòng thơm lớn",
+        color: "cyan",
+        codons: ["UGG"],
+        desc: "Axit amin lớn nhất trong 20 loại với vòng indol, chỉ có duy nhất 1 codon quy định (UGG). Tiền chất của serotonin.",
+        molWeight: 204.2, formula: "C11H12N2O2", polarity: "Không phân cực"
+      },
+      {
+        code3: "Gly", code1: "G", nameVi: "Glixin", nameEn: "Glycine",
+        category: "hydrophobic", categoryLabel: "Nhỏ nhất / Linh hoạt cao",
+        color: "slate",
+        codons: ["GGU", "GGC", "GGA", "GGG"],
+        desc: "Axit amin đơn giản và nhỏ nhất (chuỗi bên chỉ có 1 nguyên tử H), không có đồng phân quang học, tạo độ linh hoạt cao cho protein.",
+        molWeight: 75.1, formula: "C2H5NO2", polarity: "Không phân cực"
+      },
+      {
+        code3: "Ser", code1: "S", nameVi: "Serin", nameEn: "Serine",
+        category: "polar", categoryLabel: "Ưa nước (Phân cực)",
+        color: "teal",
+        codons: ["UCU", "UCC", "UCA", "UCG", "AGU", "AGC"],
+        desc: "Có nhóm hydroxyl (-OH) dễ dàng tham gia phản ứng photphoryl hóa điều hòa hoạt tính enzym trong tế bào.",
+        molWeight: 105.1, formula: "C3H7NO3", polarity: "Phân cực, trung tính"
+      },
+      {
+        code3: "Thr", code1: "T", nameVi: "Treonin", nameEn: "Threonine",
+        category: "polar", categoryLabel: "Ưa nước (Phân cực)",
+        color: "teal",
+        codons: ["ACU", "ACC", "ACA", "ACG"],
+        desc: "Axit amin thiết yếu có nhóm -OH, thường nằm trên bề mặt phân tử protein để tiếp xúc với môi trường nước của tế bào.",
+        molWeight: 119.1, formula: "C4H9NO3", polarity: "Phân cực, trung tính"
+      },
+      {
+        code3: "Cys", code1: "C", nameVi: "Xistein", nameEn: "Cysteine",
+        category: "polar", categoryLabel: "Cầu đisunphua (-S-S-)",
+        color: "amber",
+        codons: ["UGU", "UGC"],
+        desc: "Chứa nhóm thiol (-SH). Hai gốc Cys gần nhau có thể tạo cầu nối đisunphua (-S-S-) liên kết vững chắc cấu trúc bậc 3 và bậc 4 của protein.",
+        molWeight: 121.2, formula: "C3H7NO2S", polarity: "Phân cực"
+      },
+      {
+        code3: "Tyr", code1: "Y", nameVi: "Tirozin", nameEn: "Tyrosine",
+        category: "polar", categoryLabel: "Phân cực / Vòng thơm",
+        color: "teal",
+        codons: ["UAU", "UAC"],
+        desc: "Chứa vòng phenol (-C6H4OH), vừa có tính chất thơm vừa phân cực, tham gia dẫn truyền tín hiệu nội bào.",
+        molWeight: 181.2, formula: "C9H11NO3", polarity: "Phân cực"
+      },
+      {
+        code3: "Asn", code1: "N", nameVi: "Asparagin", nameEn: "Asparagine",
+        category: "polar", categoryLabel: "Ưa nước (Phân cực)",
+        color: "teal",
+        codons: ["AAU", "AAC"],
+        desc: "Axit amin đầu tiên được phân lập (từ măng tây), chứa nhóm carboxamide (-CONH2).",
+        molWeight: 132.1, formula: "C4H8N2O3", polarity: "Phân cực, trung tính"
+      },
+      {
+        code3: "Gln", code1: "Q", nameVi: "Glutamin", nameEn: "Glutamine",
+        category: "polar", categoryLabel: "Ưa nước (Phân cực)",
+        color: "teal",
+        codons: ["CAA", "CAG"],
+        desc: "Axit amin tự do dồi dào nhất trong máu người, đóng vai trò vận chuyển nitơ và cung cấp năng lượng cho tế bào miễn dịch.",
+        molWeight: 146.1, formula: "C5H10N2O3", polarity: "Phân cực, trung tính"
+      },
+      {
+        code3: "Lys", code1: "K", nameVi: "Lizin", nameEn: "Lysine",
+        category: "positive", categoryLabel: "Tích điện dương (Bazơ)",
+        color: "indigo",
+        codons: ["AAA", "AAG"],
+        desc: "Axit amin thiết yếu có tính kiềm (mang điện tích dương ở pH sinh lý). Tham gia tạo liên kết ion với axit nucleic (ADN).",
+        molWeight: 146.2, formula: "C6H14N2O2", polarity: "Tích điện dương (+)"
+      },
+      {
+        code3: "Arg", code1: "R", nameVi: "Arginin", nameEn: "Arginine",
+        category: "positive", categoryLabel: "Tích điện dương (Bazơ mạnh)",
+        color: "indigo",
+        codons: ["CGU", "CGC", "CGA", "CGG", "AGA", "AGG"],
+        desc: "Chứa nhóm guanidino có tính bazơ mạnh nhất trong các axit amin, tích điện dương ở mọi điều kiện sinh lý.",
+        molWeight: 174.2, formula: "C6H14N4O2", polarity: "Tích điện dương (+)"
+      },
+      {
+        code3: "His", code1: "H", nameVi: "Histidin", nameEn: "Histidine",
+        category: "positive", categoryLabel: "Tích điện dương / Vòng Imidazole",
+        color: "indigo",
+        codons: ["CAU", "CAC"],
+        desc: "Vòng imidazole có pKa xấp xỉ 6.0, có thể nhận hoặc nhường proton ở pH sinh lý, thường là trung tâm hoạt động của nhiều enzym.",
+        molWeight: 155.2, formula: "C6H9N3O2", polarity: "Tích điện dương (+)"
+      },
+      {
+        code3: "Asp", code1: "D", nameVi: "Axit Aspartic", nameEn: "Aspartic acid",
+        category: "negative", categoryLabel: "Tích điện âm (Axit)",
+        color: "rose",
+        codons: ["GAU", "GAC"],
+        desc: "Chứa nhóm cacboxyl thứ hai (-COOH) ở mạch nhánh, mất proton mang điện tích âm (-) ở pH tế bào.",
+        molWeight: 133.1, formula: "C4H7NO4", polarity: "Tích điện âm (-)"
+      },
+      {
+        code3: "Glu", code1: "E", nameVi: "Axit Glutamic", nameEn: "Glutamic acid",
+        category: "negative", categoryLabel: "Tích điện âm (Axit)",
+        color: "rose",
+        codons: ["GAA", "GAG"],
+        desc: "Mang điện tích âm (-), là chất dẫn truyền thần kinh kích thích chủ yếu trong hệ thần kinh trung ương.",
+        molWeight: 147.1, formula: "C5H9NO4", polarity: "Tích điện âm (-)"
+      },
+      {
+        code3: "Stop", code1: "*", nameVi: "Mã Kết Thúc (Dừng)", nameEn: "Stop Codon",
+        category: "special", categoryLabel: "Mã kết thúc dịch mã",
+        color: "red",
+        codons: ["UAA", "UAG", "UGA"],
+        desc: "Ba bộ ba không mã hóa axit amin nào: UAA (Ochre), UAG (Amber), UGA (Opal). Khi ribosome gặp mã này, chuỗi polipeptit được giải phóng.",
+        molWeight: 0, formula: "N/A", polarity: "Tín hiệu kết thúc"
+      }
+    ];
+
+    // Quick Codon Map lookup: "AUG" -> Object
+    const CODON_LOOKUP_MAP = {};
+    AMINO_ACID_DATABASE.forEach(aa => {
+      aa.codons.forEach(codon => {
+        CODON_LOOKUP_MAP[codon] = aa;
+      });
+    });
+
+    /* ===================================================================
+       2. TAB SWITCHING LOGIC
+       =================================================================== */
+    function switchTab(tabIndex) {
+      activeTab = tabIndex;
+      for (let i = 1; i <= 3; i++) {
+        const content = document.getElementById(`tabContent${i}`);
+        const btn = document.getElementById(`tabBtn${i}`);
+        if (i === tabIndex) {
+          content.classList.remove('hidden');
+          btn.className = "tab-active flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm transition whitespace-nowrap";
+        } else {
+          content.classList.add('hidden');
+          btn.className = "flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition whitespace-nowrap";
+        }
+      }
+      // Stop animation if switching away from tab 1
+      if (tabIndex !== 1 && isPlaying) {
+        togglePlayback();
+      }
+    }
+
+    /* ===================================================================
+       3. NOTATION TOGGLE (X vs C)
+       =================================================================== */
+    function setNuNotation(notation) {
+      currentNotation = notation;
+      const btnX = document.getElementById('btnNotationX');
+      const btnC = document.getElementById('btnNotationC');
+      if (notation === 'X') {
+        btnX.className = "px-2.5 py-1 rounded-lg font-semibold transition bg-teal-600 text-white shadow-sm";
+        btnC.className = "px-2.5 py-1 rounded-lg font-semibold transition text-slate-400 hover:text-white";
+        document.querySelectorAll('.notation-x-label').forEach(el => el.textContent = "X : Xitôzin");
+        document.querySelectorAll('.notation-x-pure').forEach(el => el.textContent = "Nu loại X");
+        document.querySelectorAll('.notation-x-eq').forEach(el => el.textContent = "G = X");
+      } else {
+        btnC.className = "px-2.5 py-1 rounded-lg font-semibold transition bg-teal-600 text-white shadow-sm";
+        btnX.className = "px-2.5 py-1 rounded-lg font-semibold transition text-slate-400 hover:text-white";
+        document.querySelectorAll('.notation-x-label').forEach(el => el.textContent = "C : Cytosine");
+        document.querySelectorAll('.notation-x-pure').forEach(el => el.textContent = "Nu loại C");
+        document.querySelectorAll('.notation-x-eq').forEach(el => el.textContent = "G = C");
+      }
+      // Re-render Tab 1 & Tab 2
+      handleDnaInput();
+      calculateDirect();
+      renderAminoCards();
+    }
+
+    /* ===================================================================
+       4. TAB 1 LOGIC: SIMULATION (TRANSCRIPTION & TRANSLATION)
+       =================================================================== */
+    // Helper to get color classes for nucleotide beads
+    function getNuStyle(nu) {
+      const u = nu.toUpperCase();
+      switch (u) {
+        case 'A': return 'bg-red-500/20 text-red-400 border-red-500/40';
+        case 'T': return 'bg-amber-500/20 text-amber-400 border-amber-500/40';
+        case 'U': return 'bg-purple-500/20 text-purple-300 border-purple-500/40';
+        case 'G': return 'bg-blue-500/20 text-blue-400 border-blue-500/40';
+        case 'X':
+        case 'C': return 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40';
+        default: return 'bg-slate-700 text-slate-300 border-slate-600';
+      }
+    }
+
+    function formatNuChar(char) {
+      if (char === 'C' && currentNotation === 'X') return 'X';
+      if (char === 'X' && currentNotation === 'C') return 'C';
+      return char;
+    }
+
+    function handleDnaInput() {
+      const raw = document.getElementById('dnaInput').value;
+      const clean = raw.replace(/\s+/g, '').toUpperCase();
+      
+      const lengthBadge = document.getElementById('dnaLengthBadge');
+      const codonBadge = document.getElementById('codonCountBadge');
+      const alertBox = document.getElementById('dnaAlertBox');
+
+      lengthBadge.textContent = clean.length;
+      codonBadge.textContent = Math.floor(clean.length / 3);
+
+      // Validation check
+      const invalidChars = clean.split('').filter(c => !['A', 'T', 'G', 'X', 'C'].includes(c));
+      
+      if (invalidChars.length > 0) {
+        const uniqueInvalids = [...new Set(invalidChars)].join(', ');
+        alertBox.className = "p-3 rounded-xl text-xs font-medium flex items-center gap-2 bg-red-950/70 border border-red-800 text-red-300";
+        alertBox.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-red-400 text-sm"></i>
+          <span><strong>Phát hiện ký tự không hợp lệ:</strong> "${uniqueInvalids}". Phân tử ADN chỉ chứa các nuclêôtit loại A, T, G, ${currentNotation === 'X' ? 'X' : 'C'}. Vui lòng kiểm tra lại.</span>`;
+        alertBox.classList.remove('hidden');
+      } else if (clean.length > 0 && clean.length % 3 !== 0) {
+        const remainder = clean.length % 3;
+        alertBox.className = "p-3 rounded-xl text-xs font-medium flex items-center gap-2 bg-amber-950/60 border border-amber-800/80 text-amber-300";
+        alertBox.innerHTML = `<i class="fa-solid fa-circle-info text-amber-400 text-sm"></i>
+          <span><strong>Lưu ý:</strong> Chuỗi có ${clean.length} nuclêôtit (${Math.floor(clean.length / 3)} bộ ba đầy đủ và thừa ${remainder} nu ở cuối). Các nu thừa chưa đủ tạo thành 1 codon.</span>`;
+        alertBox.classList.remove('hidden');
+      } else {
+        alertBox.classList.add('hidden');
+      }
+
+      renderDnaStreams(clean);
+    }
+
+    function renderDnaStreams(cleanDna) {
+      const strandComp = document.getElementById('strandComplementary');
+      const strandHBonds = document.getElementById('strandHydrogenBonds');
+      const strandTemp = document.getElementById('strandTemplate');
+      const strandMrna = document.getElementById('strandMrna');
+      const peptideContainer = document.getElementById('peptideChainContainer');
+
+      if (!cleanDna || cleanDna.length === 0) {
+        strandComp.innerHTML = `<span class="text-slate-500 font-bold px-2">5' -</span><span class="text-slate-500 italic text-xs py-2 px-3">(Nhập chuỗi ADN để xem mạch bổ sung)</span><span class="text-slate-500 font-bold px-2">- 3'</span>`;
+        strandHBonds.innerHTML = '';
+        strandTemp.innerHTML = `<span class="text-teal-400 font-bold px-2">3' -</span><span class="text-slate-500 italic text-xs py-2 px-3">(Đang chờ dữ liệu...)</span><span class="text-teal-400 font-bold px-2">- 5'</span>`;
+        strandMrna.innerHTML = `<span class="text-purple-400 font-bold px-2">5' -</span><span class="text-slate-500 italic text-xs py-2 px-3">(Đang chờ chuỗi ADN...)</span><span class="text-purple-400 font-bold px-2">- 3'</span>`;
+        peptideContainer.innerHTML = `<span class="text-indigo-400 font-bold font-mono text-xs px-2">N-đầu [</span><span class="text-slate-500 italic text-xs py-2 px-3">(Chuỗi axit amin sẽ hiển thị tại đây)</span><span class="text-indigo-400 font-bold font-mono text-xs px-2">] C-đuôi</span>`;
+        
+        updateStats(0, 0, 0, 0);
+        return;
+      }
+
+      // Step 1: Compute Complementary DNA & Hydrogen bonds
+      let compHtml = `<span class="text-slate-400 font-bold font-mono px-2">5' -</span>`;
+      let hBondsHtml = `<span class="px-2 opacity-0">...</span>`;
+      let tempHtml = `<span class="text-teal-400 font-bold font-mono px-2">3' -</span>`;
+
+      // Step 2: Compute mRNA
+      let mrnaCodons = [];
+      let currentCodon = [];
+
+      for (let i = 0; i < cleanDna.length; i++) {
+        const tNu = cleanDna[i]; // Template nu
+        let cNu = '';           // Complementary nu
+        let hSymbol = '';       // Hydrogen bond symbol
+        let rNu = '';           // mRNA nu
+
+        // Complementary strand rule (A-T, T-A, G-X, X-G)
+        if (tNu === 'A') { cNu = 'T'; hSymbol = '||'; rNu = 'U'; }
+        else if (tNu === 'T') { cNu = 'A'; hSymbol = '||'; rNu = 'A'; }
+        else if (tNu === 'G') { cNu = (currentNotation === 'X' ? 'X' : 'C'); hSymbol = '|||'; rNu = (currentNotation === 'X' ? 'X' : 'C'); }
+        else if (tNu === 'X' || tNu === 'C') { cNu = 'G'; hSymbol = '|||'; rNu = 'G'; }
+        else { cNu = '?'; hSymbol = '-'; rNu = '?'; }
+
+        // Beads
+        compHtml += `<div class="dna-bead w-8 h-8 rounded-lg flex items-center justify-center font-bold border ${getNuStyle(cNu)} shadow-sm" title="Nu bổ sung: ${cNu}">${formatNuChar(cNu)}</div>`;
+        hBondsHtml += `<div class="w-8 flex items-center justify-center font-mono font-bold text-slate-500">${hSymbol}</div>`;
+        tempHtml += `<div class="dna-bead w-8 h-8 rounded-lg flex items-center justify-center font-bold border ${getNuStyle(tNu)} shadow-sm" title="Nu khuôn: ${tNu}">${formatNuChar(tNu)}</div>`;
+
+        currentCodon.push(rNu);
+        if (currentCodon.length === 3) {
+          mrnaCodons.push(currentCodon);
+          currentCodon = [];
+        }
+      }
+
+      compHtml += `<span class="text-slate-400 font-bold font-mono px-2">- 3'</span>`;
+      tempHtml += `<span class="text-teal-400 font-bold font-mono px-2">- 5'</span>`;
+
+      strandComp.innerHTML = compHtml;
+      strandHBonds.innerHTML = hBondsHtml;
+      strandTemp.innerHTML = tempHtml;
+
+      // Render mRNA codons
+      let mrnaHtml = `<span class="text-purple-400 font-bold font-mono px-2">5' -</span>`;
+      mrnaCodons.forEach((codonArr, idx) => {
+        const codonStr = codonArr.join('');
+        // Translate for codon check: convert X to C for standard lookup
+        const lookupCodon = codonStr.replace(/X/g, 'C');
+        const amino = CODON_LOOKUP_MAP[lookupCodon] || { code3: "???", nameVi: "Chưa rõ", color: "slate" };
+
+        let borderHighlight = "border-purple-500/30 bg-purple-950/30";
+        let labelBadge = `<span class="text-[10px] text-purple-300 font-mono">#${idx + 1}</span>`;
+
+        if (lookupCodon === 'AUG') {
+          borderHighlight = "border-emerald-500/80 bg-emerald-950/40 ring-2 ring-emerald-500/40";
+          labelBadge = `<span class="text-[10px] text-emerald-300 font-semibold flex items-center gap-1"><i class="fa-solid fa-play text-[8px]"></i> Mở đầu</span>`;
+        } else if (['UAA', 'UAG', 'UGA'].includes(lookupCodon)) {
+          borderHighlight = "border-red-500/80 bg-red-950/40 ring-2 ring-red-500/40";
+          labelBadge = `<span class="text-[10px] text-red-300 font-semibold flex items-center gap-1"><i class="fa-solid fa-stop text-[8px]"></i> Kết thúc</span>`;
+        }
+
+        mrnaHtml += `
+          <div id="codonBox-${idx}" class="p-1.5 rounded-xl border ${borderHighlight} flex flex-col items-center gap-1 transition-all duration-300">
+            <div class="flex items-center gap-1">
+              ${codonArr.map(n => `<div class="w-7 h-7 rounded-md flex items-center justify-center font-bold text-xs border ${getNuStyle(n)}">${formatNuChar(n)}</div>`).join('')}
+            </div>
+            <div class="flex items-center justify-between w-full px-1">
+              ${labelBadge}
+              <span class="text-[10px] text-slate-400 font-mono">${amino.code3}</span>
+            </div>
+          </div>
+        `;
+      });
+
+      // If trailing incomplete nucleotides exist
+      if (currentCodon.length > 0) {
+        mrnaHtml += `
+          <div class="p-1.5 rounded-xl border border-dashed border-amber-500/40 bg-amber-950/20 flex flex-col items-center gap-1 opacity-70" title="Codon chưa đủ 3 nu">
+            <div class="flex items-center gap-1">
+              ${currentCodon.map(n => `<div class="w-7 h-7 rounded-md flex items-center justify-center font-bold text-xs border ${getNuStyle(n)}">${formatNuChar(n)}</div>`).join('')}
+            </div>
+            <span class="text-[10px] text-amber-400 font-mono">Dở dang</span>
+          </div>
+        `;
+      }
+
+      mrnaHtml += `<span class="text-purple-400 font-bold font-mono px-2">- 3'</span>`;
+      strandMrna.innerHTML = mrnaHtml;
+
+      // Render Peptide Chain (Proteins)
+      let peptideHtml = `<span class="text-indigo-400 font-bold font-mono text-xs px-2">N-đầu [</span>`;
+      let aaCount = 0;
+      let hasStop = false;
+
+      mrnaCodons.forEach((codonArr, idx) => {
+        const codonStr = codonArr.join('');
+        const lookupCodon = codonStr.replace(/X/g, 'C');
+        const amino = CODON_LOOKUP_MAP[lookupCodon];
+
+        if (amino) {
+          if (amino.code3 === 'Stop') {
+            hasStop = true;
+            peptideHtml += `
+              <div id="peptideBead-${idx}" onclick="openAminoDetailByCode('Stop')" class="cursor-pointer group flex items-center gap-2 px-3 py-2 rounded-2xl bg-red-950/60 border border-red-500/60 hover:border-red-400 hover:scale-105 transition-all shadow-lg">
+                <div class="w-7 h-7 rounded-xl bg-red-500 text-white flex items-center justify-center text-xs font-bold shadow-md">
+                  <i class="fa-solid fa-hand"></i>
+                </div>
+                <div class="text-left">
+                  <div class="text-xs font-extrabold text-red-300">DỪNG (STOP)</div>
+                  <div class="text-[10px] text-red-400 font-mono">${codonStr} (Mã kết thúc)</div>
+                </div>
+              </div>
+            `;
+          } else {
+            aaCount++;
+            let badgeBg = "bg-indigo-950/60 border-indigo-500/40 text-indigo-300 hover:border-indigo-400";
+            let icon = "fa-circle-nodes";
+            if (amino.code3 === 'Met') {
+              badgeBg = "bg-emerald-950/60 border-emerald-500/60 text-emerald-300 hover:border-emerald-400 ring-1 ring-emerald-400/30";
+              icon = "fa-star";
+            }
+
+            peptideHtml += `
+              <div id="peptideBead-${idx}" onclick="openAminoDetailByCode('${amino.code3}')" class="cursor-pointer group flex items-center gap-2.5 px-3.5 py-2 rounded-2xl border ${badgeBg} hover:scale-105 transition-all shadow-md">
+                <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 to-teal-500 text-white flex items-center justify-center text-xs font-mono font-black shadow">
+                  ${amino.code1}
+                </div>
+                <div class="text-left">
+                  <div class="text-xs font-bold text-white flex items-center gap-1">
+                    <span>${amino.code3}</span>
+                    <span class="text-[10px] text-slate-400 font-normal">(${amino.nameVi})</span>
+                  </div>
+                  <div class="text-[10px] text-slate-400 font-mono">${codonStr} • #${idx + 1}</div>
+                </div>
+              </div>
+              <i class="fa-solid fa-link text-[10px] text-indigo-500/60"></i>
+            `;
+          }
+        }
+      });
+
+      // Clean last link icon if needed
+      if (peptideHtml.endsWith('<i class="fa-solid fa-link text-[10px] text-indigo-500/60"></i>')) {
+        peptideHtml = peptideHtml.slice(0, -('<i class="fa-solid fa-link text-[10px] text-indigo-500/60"></i>'.length));
+      }
+
+      peptideHtml += `<span class="text-indigo-400 font-bold font-mono text-xs px-2">] C-đuôi</span>`;
+      peptideContainer.innerHTML = peptideHtml;
+
+      updateStats(cleanDna.length, cleanDna.length, mrnaCodons.length, aaCount);
+    }
+
+    function updateStats(dnaNu, rnaNu, codons, aaCount) {
+      document.getElementById('statDnaNu').textContent = dnaNu;
+      document.getElementById('statRnaNu').textContent = rnaNu;
+      document.getElementById('statCodonTotal').textContent = codons;
+      document.getElementById('statAminoAcids').textContent = aaCount;
+    }
+
+    /* Preset Sequences */
+    function loadPreset(type) {
+      let seq = "";
+      if (type === 'standard') {
+        // TAC GGC TTA ATG ATC ATT (AUG -> CCU -> AAU -> UAC -> UAG [Stop])
+        seq = "TACGGCTTAATGATCATT";
+      } else if (type === 'insulin') {
+        // 30 Nu sample
+        seq = "TACTTCGTCAATCAACACCTTGTTAAACTT";
+      } else if (type === 'random') {
+        // Generate random sequence starting with TAC and ending with ATC / ATT / ACT
+        const pool = ['A', 'T', 'G', currentNotation];
+        const codonList = ['TAC']; // Starts with TAC (AUG on mRNA)
+        const middleLength = Math.floor(Math.random() * 4) + 3; // 3 to 6 middle codons
+        for (let i = 0; i < middleLength; i++) {
+          const c1 = pool[Math.floor(Math.random() * pool.length)];
+          const c2 = pool[Math.floor(Math.random() * pool.length)];
+          const c3 = pool[Math.floor(Math.random() * pool.length)];
+          codonList.push(c1 + c2 + c3);
+        }
+        // End with template for Stop Codon: ATT (UAA), ATC (UAG), or ACT (UGA)
+        const stopTemps = ['ATT', 'ATC', 'ACT'];
+        codonList.push(stopTemps[Math.floor(Math.random() * stopTemps.length)]);
+        seq = codonList.join('');
+      }
+      document.getElementById('dnaInput').value = seq;
+      handleDnaInput();
+      showToast(`Đã nạp chuỗi mẫu: ${seq.length} Nu!`);
+    }
+
+    function clearDnaInput() {
+      document.getElementById('dnaInput').value = '';
+      handleDnaInput();
+      if (isPlaying) togglePlayback();
+    }
+
+    /* Playback Ribosome Animation */
+    function togglePlayback() {
+      const btnText = document.getElementById('playText');
+      const playIcon = document.getElementById('playIcon');
+      const clean = document.getElementById('dnaInput').value.replace(/\s+/g, '').toUpperCase();
+      const numCodons = Math.floor(clean.length / 3);
+
+      if (numCodons === 0) {
+        showToast("Vui lòng nhập chuỗi ADN trước khi mô phỏng!");
+        return;
+      }
+
+      if (isPlaying) {
+        // Stop
+        clearInterval(playbackInterval);
+        isPlaying = false;
+        btnText.textContent = "Mô phỏng Ribosome chạy";
+        playIcon.className = "fa-solid fa-play";
+        resetCodonHighlights();
+      } else {
+        // Start
+        isPlaying = true;
+        btnText.textContent = "Dừng mô phỏng";
+        playIcon.className = "fa-solid fa-pause";
+        currentStepCodonIndex = 0;
+
+        playbackInterval = setInterval(() => {
+          if (currentStepCodonIndex >= numCodons) {
+            // Done loop
+            togglePlayback();
+            showToast("Hoàn thành quá trình dịch mã!");
+            return;
+          }
+
+          highlightCodonStep(currentStepCodonIndex);
+          currentStepCodonIndex++;
+        }, 1200);
+      }
+    }
+
+    function highlightCodonStep(idx) {
+      resetCodonHighlights();
+      const box = document.getElementById(`codonBox-${idx}`);
+      const bead = document.getElementById(`peptideBead-${idx}`);
+      if (box) {
+        box.classList.add('ring-4', 'ring-teal-400', 'scale-110', 'bg-teal-950/80');
+        box.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      }
+      if (bead) {
+        bead.classList.add('ring-4', 'ring-teal-400', 'scale-115', 'bg-teal-900');
+        bead.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      }
+    }
+
+    function resetCodonHighlights() {
+      document.querySelectorAll('[id^="codonBox-"]').forEach(el => {
+        el.classList.remove('ring-4', 'ring-teal-400', 'scale-110', 'bg-teal-950/80');
+      });
+      document.querySelectorAll('[id^="peptideBead-"]').forEach(el => {
+        el.classList.remove('ring-4', 'ring-teal-400', 'scale-115', 'bg-teal-900');
+      });
+    }
+
+    function copyTranslationResult() {
+      const clean = document.getElementById('dnaInput').value.replace(/\s+/g, '').toUpperCase();
+      if (!clean) {
+        showToast("Không có dữ liệu để sao chép!");
+        return;
+      }
+      
+      const codons = [];
+      const aaList = [];
+      for (let i = 0; i < clean.length - 2; i += 3) {
+        const t3 = clean.substring(i, i + 3);
+        let m3 = '';
+        for (let j = 0; j < 3; j++) {
+          if (t3[j] === 'A') m3 += 'U';
+          else if (t3[j] === 'T') m3 += 'A';
+          else if (t3[j] === 'G') m3 += currentNotation;
+          else if (t3[j] === 'X' || t3[j] === 'C') m3 += 'G';
+        }
+        codons.push(m3);
+        const lk = m3.replace(/X/g, 'C');
+        const aa = CODON_LOOKUP_MAP[lk];
+        aaList.push(aa ? aa.code3 : '???');
+      }
+
+      const text = `=== KẾT QUẢ DỊCH MÃ SINH HỌC 9 ===\n` +
+        `- Mạch gốc ADN (3'-5'): ${clean}\n` +
+        `- Mạch mARN (5'-3'): ${codons.join(' ')}\n` +
+        `- Chuỗi Polipeptit: ${aaList.join(' - ')}\n` +
+        `==================================`;
+
+      navigator.clipboard.writeText(text).then(() => {
+        showToast("Đã sao chép kết quả phiên mã & dịch mã!");
+      });
+    }
+
+    /* ===================================================================
+       5. TAB 2 LOGIC: DNA CALCULATOR (DIRECT & INVERSE)
+       =================================================================== */
+    function switchCalcMode(mode) {
+      document.getElementById('subTabCalc1').className = (mode === 'direct')
+        ? "px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition bg-teal-600 text-white shadow-md"
+        : "px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition text-slate-400 hover:text-white hover:bg-slate-700/50";
+      
+      document.getElementById('subTabCalc2').className = (mode === 'inverse')
+        ? "px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition bg-teal-600 text-white shadow-md"
+        : "px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition text-slate-400 hover:text-white hover:bg-slate-700/50";
+
+      document.getElementById('subTabCalc3').className = (mode === 'cheatsheet')
+        ? "px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition bg-teal-600 text-white shadow-md"
+        : "px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition text-slate-400 hover:text-white hover:bg-slate-700/50";
+
+      document.getElementById('calcDirectView').classList.toggle('hidden', mode !== 'direct');
+      document.getElementById('calcInverseView').classList.toggle('hidden', mode !== 'inverse');
+      document.getElementById('calcCheatsheetView').classList.toggle('hidden', mode !== 'cheatsheet');
+
+      if (mode === 'direct') calculateDirect();
+      if (mode === 'inverse') calculateInverse();
+    }
+
+    /* Dạng 1: Bài toán thuận */
+    function setDirectPreset(a, g) {
+      document.getElementById('inputNuA').value = a;
+      document.getElementById('inputNuG').value = g;
+      calculateDirect();
+      showToast(`Đã nạp số liệu: A = ${a}, G = ${g}`);
+    }
+
+    function calculateDirect() {
+      const A = parseFloat(document.getElementById('inputNuA').value) || 0;
+      const G = parseFloat(document.getElementById('inputNuG').value) || 0;
+      const T = A;
+      const X = G;
+
+      const N = 2 * A + 2 * G;
+      const H = 2 * A + 3 * G;
+      const L_angstrom = (N / 2) * 3.4;
+      const L_nm = L_angstrom / 10;
+      const L_um = L_angstrom / 10000;
+      const M = N * 300;
+      const C = N / 20;
+      const covalentBetween = Math.max(0, N - 2);
+      const covalentTotal = Math.max(0, 2 * N - 2);
+
+      const pctA = N > 0 ? ((A / N) * 100).toFixed(1) : 0;
+      const pctG = N > 0 ? ((G / N) * 100).toFixed(1) : 0;
+
+      // Update UI cards
+      document.getElementById('resTotalNu').textContent = N.toLocaleString();
+      document.getElementById('resHydro').textContent = H.toLocaleString();
+      document.getElementById('resLength').textContent = `${L_angstrom.toLocaleString()} Å`;
+      document.getElementById('resLengthAlt').textContent = `= ${L_nm.toLocaleString()} nm = ${L_um} µm`;
+      document.getElementById('resMass').textContent = M.toLocaleString();
+      document.getElementById('resCycles').textContent = C.toLocaleString();
+      document.getElementById('resCovalent').textContent = covalentBetween.toLocaleString();
+
+      // Detailed Step by step explanation
+      const xName = currentNotation === 'X' ? 'X' : 'C';
+      const solutionDiv = document.getElementById('directSolutionText');
+      solutionDiv.innerHTML = `
+        <div class="space-y-3">
+          <div>
+            <span class="text-teal-400 font-bold">Bước 1: Áp dụng Nguyên tắc Bổ sung (NTBS)</span>
+            <p class="text-slate-300 ml-4">
+              Trong phân tử ADN 2 mạch liên kết bổ sung với nhau:<br>
+              • A = T = <span class="text-white font-bold">${A.toLocaleString()}</span> nuclêôtit (${pctA}%)<br>
+              • G = ${xName} = <span class="text-white font-bold">${G.toLocaleString()}</span> nuclêôtit (${pctG}%)
+            </p>
+          </div>
+
+          <div>
+            <span class="text-teal-400 font-bold">Bước 2: Tính Tổng số Nuclêôtit của Gen (N)</span>
+            <p class="text-slate-300 ml-4">
+              Công thức: <code class="text-teal-300">N = 2A + 2G</code><br>
+              Thế số: N = 2 × ${A.toLocaleString()} + 2 × ${G.toLocaleString()} = <span class="text-white font-bold">${N.toLocaleString()}</span> nuclêôtit.
+            </p>
+          </div>
+
+          <div>
+            <span class="text-amber-400 font-bold">Bước 3: Tính Số liên kết Hiđrô (H)</span>
+            <p class="text-slate-300 ml-4">
+              Do A liên kết với T bằng 2 liên kết hiđrô, G liên kết với ${xName} bằng 3 liên kết hiđrô:<br>
+              Công thức: <code class="text-amber-300">H = 2A + 3G</code><br>
+              Thế số: H = 2 × ${A.toLocaleString()} + 3 × ${G.toLocaleString()} = <span class="text-white font-bold">${H.toLocaleString()}</span> liên kết hiđrô.
+            </p>
+          </div>
+
+          <div>
+            <span class="text-indigo-400 font-bold">Bước 4: Tính Chiều dài của Gen (L)</span>
+            <p class="text-slate-300 ml-4">
+              Gen gồm 2 mạch đơn song song xoắn kép, chiều dài gen bằng chiều dài 1 mạch (gồm N/2 nuclêôtit), mỗi nuclêôtit dài 3.4 Å:<br>
+              Công thức: <code class="text-indigo-300">L = (N / 2) × 3.4 Å</code><br>
+              Thế số: L = (${N.toLocaleString()} / 2) × 3.4 = <span class="text-white font-bold">${L_angstrom.toLocaleString()} Å</span>.<br>
+              Đổi đơn vị: = <span class="text-white font-bold">${L_nm.toLocaleString()} nm</span> = <span class="text-white font-bold">${L_um} µm</span>.
+            </p>
+          </div>
+
+          <div>
+            <span class="text-purple-400 font-bold">Bước 5: Tính Khối lượng phân tử & Chu kỳ xoắn</span>
+            <p class="text-slate-300 ml-4">
+              • Khối lượng gen: <code class="text-purple-300">M = N × 300 đvC</code> = ${N.toLocaleString()} × 300 = <span class="text-white font-bold">${M.toLocaleString()} đvC</span>.<br>
+              • Chu kỳ xoắn: Mỗi chu kỳ gồm 10 cặp = 20 nuclêôtit:<br>
+                <code class="text-emerald-300">C = N / 20</code> = ${N.toLocaleString()} / 20 = <span class="text-white font-bold">${C.toLocaleString()} chu kỳ</span>.
+            </p>
+          </div>
+
+          <div>
+            <span class="text-cyan-400 font-bold">Bước 6: Số liên kết hóa trị (Photphodieste)</span>
+            <p class="text-slate-300 ml-4">
+              • Số liên kết hóa trị <em>nối giữa các nuclêôtit</em> trên cả 2 mạch: <code class="text-cyan-300">N - 2</code> = <span class="text-white font-bold">${covalentBetween.toLocaleString()}</span> liên kết.<br>
+              • Tổng số liên kết hóa trị trong toàn bộ gen (tính cả liên kết trong mỗi nucleotit): <code class="text-cyan-300">2N - 2</code> = <span class="text-white font-bold">${covalentTotal.toLocaleString()}</span> liên kết.
+            </p>
+          </div>
+        </div>
+      `;
+    }
+
+    /* Dạng 2: Bài toán ngược */
+    function changeInverseInputType() {
+      const type = document.getElementById('inverseTypeSelect').value;
+      const container = document.getElementById('inverseInputContainer');
+
+      if (type === 'N_H') {
+        container.innerHTML = `
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Tổng số Nuclêôtit (N):</label>
+            <input type="number" id="invInp1" value="3000" min="20" step="2" oninput="calculateInverse()"
+              class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white font-mono text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Số liên kết Hiđrô (H):</label>
+            <input type="number" id="invInp2" value="3900" min="20" step="1" oninput="calculateInverse()"
+              class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white font-mono text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          </div>
+        `;
+      } else if (type === 'L_H') {
+        container.innerHTML = `
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Chiều dài gen L (Ång-xtrông - Å):</label>
+            <input type="number" id="invInp1" value="4080" min="34" step="3.4" oninput="calculateInverse()"
+              class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white font-mono text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Số liên kết Hiđrô (H):</label>
+            <input type="number" id="invInp2" value="3120" min="20" step="1" oninput="calculateInverse()"
+              class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white font-mono text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          </div>
+        `;
+      } else if (type === 'C_H') {
+        container.innerHTML = `
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Số chu kỳ xoắn (C):</label>
+            <input type="number" id="invInp1" value="150" min="1" step="1" oninput="calculateInverse()"
+              class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white font-mono text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Số liên kết Hiđrô (H):</label>
+            <input type="number" id="invInp2" value="3900" min="20" step="1" oninput="calculateInverse()"
+              class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white font-mono text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          </div>
+        `;
+      } else if (type === 'N_pctA') {
+        container.innerHTML = `
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Tổng số Nuclêôtit (N):</label>
+            <input type="number" id="invInp1" value="2400" min="20" step="2" oninput="calculateInverse()"
+              class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white font-mono text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Tỉ lệ % của loại A (hoặc T) (%):</label>
+            <input type="number" id="invInp2" value="20" min="1" max="49" step="0.5" oninput="calculateInverse()"
+              class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white font-mono text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          </div>
+        `;
+      }
+
+      calculateInverse();
+    }
+
+    function setInversePreset(type, val1, val2) {
+      document.getElementById('inverseTypeSelect').value = type;
+      changeInverseInputType();
+      document.getElementById('invInp1').value = val1;
+      document.getElementById('invInp2').value = val2;
+      calculateInverse();
+      showToast(`Đã tải bộ đề thi mẫu: ${type}`);
+    }
+
+    function calculateInverse() {
+      const type = document.getElementById('inverseTypeSelect').value;
+      const inp1 = parseFloat(document.getElementById('invInp1')?.value) || 0;
+      const inp2 = parseFloat(document.getElementById('invInp2')?.value) || 0;
+      const alertBox = document.getElementById('inverseAlertBox');
+      const solutionDiv = document.getElementById('inverseSolutionText');
+      const xName = currentNotation === 'X' ? 'X' : 'C';
+
+      let N = 0;
+      let H = 0;
+      let preStep = "";
+
+      if (type === 'N_H') {
+        N = inp1;
+        H = inp2;
+      } else if (type === 'L_H') {
+        const L = inp1;
+        H = inp2;
+        N = Math.round((2 * L) / 3.4);
+        preStep = `
+          <div>
+            <span class="text-teal-400 font-bold">Bước 0: Tìm Tổng số Nuclêôtit N từ Chiều dài L</span>
+            <p class="text-slate-300 ml-4">
+              Áp dụng công thức L = (N / 2) × 3.4 Å ➔ <code class="text-teal-300">N = (2 × L) / 3.4</code><br>
+              Thế số: N = (2 × ${L}) / 3.4 = <span class="text-white font-bold">${N.toLocaleString()}</span> nuclêôtit.
+            </p>
+          </div>
+        `;
+      } else if (type === 'C_H') {
+        const C = inp1;
+        H = inp2;
+        N = C * 20;
+        preStep = `
+          <div>
+            <span class="text-teal-400 font-bold">Bước 0: Tìm Tổng số Nuclêôtit N từ Chu kỳ xoắn C</span>
+            <p class="text-slate-300 ml-4">
+              Mỗi chu kỳ gồm 20 Nu ➔ <code class="text-teal-300">N = C × 20</code><br>
+              Thế số: N = ${C} × 20 = <span class="text-white font-bold">${N.toLocaleString()}</span> nuclêôtit.
+            </p>
+          </div>
+        `;
+      } else if (type === 'N_pctA') {
+        N = inp1;
+        const pctA = inp2;
+        const A = Math.round((pctA / 100) * N);
+        const T = A;
+        const G = (N / 2) - A;
+        const X = G;
+        H = 2 * A + 3 * G;
+        
+        // Update UI
+        updateInverseResults(A, T, G, X, N, H);
+
+        solutionDiv.innerHTML = `
+          <div class="space-y-3">
+            <div>
+              <span class="text-teal-400 font-bold">Bước 1: Tính số lượng Nuclêôtit loại A và T</span>
+              <p class="text-slate-300 ml-4">
+                Theo NTBS: A = T.<br>
+                Đề bài cho %A = ${pctA}% ➔ <code class="text-teal-300">A = T = ${pctA}% × N</code><br>
+                A = T = (${pctA} / 100) × ${N.toLocaleString()} = <span class="text-white font-bold">${A.toLocaleString()}</span> nuclêôtit.
+              </p>
+            </div>
+            <div>
+              <span class="text-amber-400 font-bold">Bước 2: Tính số lượng Nuclêôtit loại G và ${xName}</span>
+              <p class="text-slate-300 ml-4">
+                Theo NTBS: %A + %G = 50% ➔ %G = 50% - ${pctA}% = <span class="text-white font-bold">${(50 - pctA).toFixed(1)}%</span>.<br>
+                G = ${xName} = (N / 2) - A = (${N.toLocaleString()} / 2) - ${A.toLocaleString()} = <span class="text-white font-bold">${G.toLocaleString()}</span> nuclêôtit.
+              </p>
+            </div>
+            <div>
+              <span class="text-indigo-400 font-bold">Bước 3: Tính số liên kết Hiđrô H</span>
+              <p class="text-slate-300 ml-4">
+                H = 2A + 3G = 2 × ${A.toLocaleString()} + 3 × ${G.toLocaleString()} = <span class="text-white font-bold">${H.toLocaleString()}</span> liên kết.
+              </p>
+            </div>
+          </div>
+        `;
+        alertBox.className = "p-4 rounded-2xl border bg-emerald-950/40 border-emerald-500/50 text-emerald-300 flex items-center gap-3";
+        alertBox.innerHTML = `<i class="fa-solid fa-circle-check text-xl text-emerald-400"></i>
+          <div>
+            <div class="font-bold text-white">Dữ liệu hợp lệ! Đã giải thành công.</div>
+            <div class="text-xs text-emerald-300">Đã tìm thấy số lượng các loại nuclêôtit thỏa mãn điều kiện đề bài.</div>
+          </div>`;
+        return;
+      }
+
+      // Solve System of Equations for N and H:
+      // 2A + 2G = N  (1)
+      // 2A + 3G = H  (2)
+      // (2) - (1) => G = H - N
+      // A = (N / 2) - G
+      const G = H - N;
+      const A = (N / 2) - G;
+      const T = A;
+      const X = G;
+
+      // Validation
+      let isValid = true;
+      let errorReason = "";
+
+      if (N <= 0 || H <= 0) {
+        isValid = false;
+        errorReason = "Các giá trị N và H phải là số dương lớn hơn 0.";
+      } else if (G <= 0) {
+        isValid = false;
+        errorReason = `Số liên kết Hiđrô H (${H}) phải lớn hơn tổng số Nu N (${N}). Do G = H - N nên G sẽ bị âm hoặc bằng 0!`;
+      } else if (A <= 0) {
+        isValid = false;
+        errorReason = `Số Nu loại A = (N/2) - G bị âm hoặc bằng 0! Kiểm tra lại: H phải nhỏ hơn 1.5 × N.`;
+      } else if (N % 2 !== 0) {
+        isValid = false;
+        errorReason = `Tổng số Nu N (${N}) phải là số chẵn vì ADN gồm 2 mạch đơn bổ sung từng đôi một.`;
+      }
+
+      if (!isValid) {
+        alertBox.className = "p-4 rounded-2xl border bg-red-950/60 border-red-800 text-red-300 flex items-center gap-3";
+        alertBox.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-xl text-red-400"></i>
+          <div>
+            <div class="font-bold text-white">Dữ liệu đề bài mâu thuẫn hoặc không tồn tại gen sinh học!</div>
+            <div class="text-xs text-red-300 mt-0.5">${errorReason}</div>
+          </div>`;
+        updateInverseResults(0, 0, 0, 0, N, H);
+        solutionDiv.innerHTML = `<span class="text-red-400">Không thể giải vì đề bài cho số liệu vi phạm quy luật cấu trúc ADN.</span>`;
+        return;
+      }
+
+      // Valid case
+      alertBox.className = "p-4 rounded-2xl border bg-emerald-950/40 border-emerald-500/50 text-emerald-300 flex items-center gap-3";
+      alertBox.innerHTML = `<i class="fa-solid fa-circle-check text-xl text-emerald-400"></i>
+        <div>
+          <div class="font-bold text-white">Hệ phương trình có nghiệm duy nhất hợp lệ!</div>
+          <div class="text-xs text-emerald-300">Tổng N = ${N.toLocaleString()} Nu, H = ${H.toLocaleString()} liên kết hiđrô.</div>
+        </div>`;
+
+      updateInverseResults(A, T, G, X, N, H);
+
+      // Render step by step
+      solutionDiv.innerHTML = `
+        <div class="space-y-4">
+          ${preStep}
+          <div>
+            <span class="text-teal-400 font-bold">Bước 1: Lập Hệ Phương Trình Đại Số</span>
+            <p class="text-slate-300 ml-4">
+              Theo lý thuyết cấu trúc ADN và nguyên tắc bổ sung:<br>
+              • Tổng số nucleotit: <code class="text-teal-300">2A + 2G = N = ${N.toLocaleString()}</code> &nbsp;&nbsp;&nbsp;(Phương trình 1)<br>
+              • Số liên kết hiđrô: <code class="text-amber-300">2A + 3G = H = ${H.toLocaleString()}</code> &nbsp;&nbsp;&nbsp;(Phương trình 2)
+            </p>
+          </div>
+
+          <div>
+            <span class="text-indigo-400 font-bold">Bước 2: Trừ Vế theo Vế để Tìm Nu loại G và ${xName}</span>
+            <p class="text-slate-300 ml-4">
+              Lấy (Phương trình 2) trừ đi (Phương trình 1):<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;(2A + 3G) - (2A + 2G) = H - N<br>
+              ➔ <code class="text-emerald-300 font-bold">G = H - N</code><br>
+              Thế số: G = ${H.toLocaleString()} - ${N.toLocaleString()} = <span class="text-white font-bold">${G.toLocaleString()}</span> nuclêôtit.<br>
+              Theo NTBS: <span class="text-emerald-400 font-bold">${xName} = G = ${G.toLocaleString()}</span> nuclêôtit (${((G / N) * 100).toFixed(1)}%).
+            </p>
+          </div>
+
+          <div>
+            <span class="text-rose-400 font-bold">Bước 3: Tìm Nu loại A và T</span>
+            <p class="text-slate-300 ml-4">
+              Thay G vào (Phương trình 1):<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;2A + 2 × ${G.toLocaleString()} = ${N.toLocaleString()}<br>
+              ➔ 2A = ${N.toLocaleString()} - ${(2 * G).toLocaleString()}<br>
+              ➔ <code class="text-red-300 font-bold">A = (N / 2) - G</code><br>
+              Thế số: A = (${N.toLocaleString()} / 2) - ${G.toLocaleString()} = <span class="text-white font-bold">${A.toLocaleString()}</span> nuclêôtit.<br>
+              Theo NTBS: <span class="text-red-400 font-bold">T = A = ${A.toLocaleString()}</span> nuclêôtit (${((A / N) * 100).toFixed(1)}%).
+            </p>
+          </div>
+
+          <div class="border-t border-slate-700/60 pt-2">
+            <span class="text-teal-400 font-bold">Kết Luận (Đáp Số):</span>
+            <div class="grid grid-cols-2 gap-2 mt-1 text-slate-200 ml-4">
+              <div>• A = T = <span class="text-white font-bold">${A.toLocaleString()}</span> Nu (${((A / N) * 100).toFixed(1)}%)</div>
+              <div>• G = ${xName} = <span class="text-white font-bold">${G.toLocaleString()}</span> Nu (${((G / N) * 100).toFixed(1)}%)</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function updateInverseResults(A, T, G, X, N, H) {
+      document.getElementById('invResA').textContent = A.toLocaleString();
+      document.getElementById('invResT').textContent = T.toLocaleString();
+      document.getElementById('invResG').textContent = G.toLocaleString();
+      document.getElementById('invResX').textContent = X.toLocaleString();
+
+      const pctA = N > 0 ? ((A / N) * 100).toFixed(1) : 0;
+      const pctG = N > 0 ? ((G / N) * 100).toFixed(1) : 0;
+
+      document.getElementById('invResPctA').textContent = `(${pctA}%)`;
+      document.getElementById('invResPctT').textContent = `(${pctA}%)`;
+      document.getElementById('invResPctG').textContent = `(${pctG}%)`;
+      document.getElementById('invResPctX').textContent = `(${pctG}%)`;
+    }
+
+    function copySolution(elementId) {
+      const text = document.getElementById(elementId).innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        showToast("Đã sao chép toàn bộ lời giải chi tiết!");
+      });
+    }
+
+    /* ===================================================================
+       6. TAB 3 LOGIC: 20 AMINO ACIDS EXPLORER & SEARCH
+       =================================================================== */
+    function renderAminoCards() {
+      const grid = document.getElementById('aminoCardsGrid');
+      const query = (document.getElementById('aminoSearchInput')?.value || '').trim().toLowerCase();
+      
+      let matched = 0;
+      let html = '';
+
+      AMINO_ACID_DATABASE.forEach(aa => {
+        // Filter by category
+        if (selectedAminoCategory !== 'all') {
+          if (selectedAminoCategory === 'special' && aa.category !== 'special') return;
+          if (selectedAminoCategory !== 'special' && aa.category !== selectedAminoCategory) return;
+        }
+
+        // Filter by search query (name, code, codon)
+        if (query) {
+          const nameViMatch = aa.nameVi.toLowerCase().includes(query);
+          const nameEnMatch = aa.nameEn.toLowerCase().includes(query);
+          const code3Match = aa.code3.toLowerCase().includes(query);
+          const code1Match = aa.code1.toLowerCase() === query;
+          const codonMatch = aa.codons.some(c => c.toLowerCase().includes(query) || c.replace(/C/g, 'X').toLowerCase().includes(query));
+          
+          if (!nameViMatch && !nameEnMatch && !code3Match && !code1Match && !codonMatch) {
+            return;
+          }
+        }
+
+        matched++;
+
+        // Render card
+        let badgeColor = "bg-slate-700 text-slate-300";
+        let ringColor = "hover:border-slate-500";
+        if (aa.category === 'special') {
+          badgeColor = aa.code3 === 'Stop' ? "bg-red-500/20 text-red-300 border border-red-500/30" : "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
+          ringColor = aa.code3 === 'Stop' ? "hover:border-red-500" : "hover:border-emerald-500";
+        } else if (aa.category === 'hydrophobic') {
+          badgeColor = "bg-blue-500/20 text-blue-300 border border-blue-500/30";
+          ringColor = "hover:border-blue-500";
+        } else if (aa.category === 'polar') {
+          badgeColor = "bg-teal-500/20 text-teal-300 border border-teal-500/30";
+          ringColor = "hover:border-teal-500";
+        } else if (aa.category === 'positive') {
+          badgeColor = "bg-indigo-500/20 text-indigo-300 border border-indigo-500/30";
+          ringColor = "hover:border-indigo-500";
+        } else if (aa.category === 'negative') {
+          badgeColor = "bg-rose-500/20 text-rose-300 border border-rose-500/30";
+          ringColor = "hover:border-rose-500";
+        }
+
+        // Codon list representation
+        const codonBadges = aa.codons.map(c => {
+          const displayC = currentNotation === 'X' ? c.replace(/C/g, 'X') : c;
+          return `<span class="px-2 py-0.5 rounded-md bg-slate-900 border border-slate-700 text-teal-300 font-mono text-xs">${displayC}</span>`;
+        }).join(' ');
+
+        html += `
+          <div onclick="openAminoDetailByCode('${aa.code3}')" class="cursor-pointer group bg-slate-800/70 border border-slate-700/80 ${ringColor} rounded-2xl p-4 shadow-md hover:shadow-xl transition-all duration-200 flex flex-col justify-between space-y-3">
+            <div>
+              <div class="flex items-start justify-between gap-2">
+                <div>
+                  <div class="flex items-center gap-1.5">
+                    <h3 class="font-display font-bold text-white text-base group-hover:text-teal-400 transition">${aa.nameVi}</h3>
+                    <span class="text-xs font-mono font-bold text-slate-400">(${aa.code3})</span>
+                  </div>
+                  <div class="text-xs text-slate-400 italic">${aa.nameEn}</div>
+                </div>
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-slate-700 to-slate-800 border border-slate-600 text-white flex items-center justify-center font-mono font-bold text-sm shadow">
+                  ${aa.code1}
+                </div>
+              </div>
+
+              <div class="mt-2.5">
+                <span class="inline-block text-[11px] font-semibold px-2 py-0.5 rounded-lg ${badgeColor}">
+                  ${aa.categoryLabel}
+                </span>
+              </div>
+
+              <p class="text-xs text-slate-300 mt-2 line-clamp-2 leading-relaxed">
+                ${aa.desc}
+              </p>
+            </div>
+
+            <div class="border-t border-slate-700/60 pt-2.5 space-y-1.5">
+              <div class="flex items-center justify-between text-[11px] text-slate-400">
+                <span>Codon quy định:</span>
+                <span class="font-mono text-slate-400">${aa.codons.length} mã</span>
+              </div>
+              <div class="flex flex-wrap gap-1">
+                ${codonBadges}
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      grid.innerHTML = html || `
+        <div class="col-span-full py-12 text-center text-slate-400 space-y-2">
+          <i class="fa-solid fa-filter-circle-xmark text-4xl text-slate-600"></i>
+          <p class="text-sm">Không tìm thấy axit amin hoặc codon phù hợp với từ khóa: "${query}"</p>
+          <button onclick="clearAminoSearch()" class="text-xs px-3 py-1.5 rounded-lg bg-teal-600 text-white font-medium">Đặt lại bộ lọc</button>
+        </div>
+      `;
+
+      document.getElementById('aminoMatchCount').textContent = matched;
+    }
+
+    function setAminoCategory(cat) {
+      selectedAminoCategory = cat;
+      const cats = ['all', 'hydrophobic', 'polar', 'positive', 'negative', 'special'];
+      cats.forEach(c => {
+        const btn = document.getElementById(`catBtn-${c}`);
+        if (btn) {
+          if (c === cat) {
+            btn.className = "text-xs px-3 py-1.5 rounded-lg bg-teal-600 text-white font-medium transition shadow-sm";
+          } else {
+            btn.className = "text-xs px-3 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300 font-medium transition";
+          }
+        }
+      });
+      renderAminoCards();
+    }
+
+    function filterAminoCards() {
+      renderAminoCards();
+    }
+
+    function clearAminoSearch() {
+      document.getElementById('aminoSearchInput').value = '';
+      setAminoCategory('all');
+    }
+
+    /* Modal Detail View */
+    function openAminoDetailByCode(code3) {
+      const aa = AMINO_ACID_DATABASE.find(a => a.code3.toLowerCase() === code3.toLowerCase());
+      if (!aa) return;
+
+      const modal = document.getElementById('aminoDetailModal');
+      const content = document.getElementById('aminoModalContent');
+
+      const codonListFormatted = aa.codons.map(c => {
+        const displayC = currentNotation === 'X' ? c.replace(/C/g, 'X') : c;
+        return `<span class="px-2.5 py-1 rounded-lg bg-slate-800 border border-slate-700 text-teal-300 font-mono font-bold text-xs">${displayC}</span>`;
+      }).join(' ');
+
+      content.innerHTML = `
+        <div class="flex items-start gap-4 border-b border-slate-800 pb-4">
+          <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-teal-500 to-indigo-600 text-white flex items-center justify-center font-mono font-black text-2xl shadow-xl">
+            ${aa.code1}
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-teal-500/20 text-teal-400">
+                ${aa.code3}
+              </span>
+              <span class="text-xs text-slate-400 font-mono">${aa.polarity}</span>
+            </div>
+            <h3 class="text-xl font-display font-bold text-white mt-0.5">${aa.nameVi}</h3>
+            <p class="text-xs text-slate-400">${aa.nameEn}</p>
+          </div>
+        </div>
+
+        <div class="space-y-3 text-xs sm:text-sm text-slate-300 leading-relaxed pt-1">
+          <div>
+            <span class="font-bold text-slate-200">Đặc điểm sinh học:</span>
+            <p class="text-slate-300 mt-1">${aa.desc}</p>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 text-xs font-mono bg-slate-800/60 p-3 rounded-xl border border-slate-700/60">
+            <div>
+              <span class="text-slate-400">Khối lượng (Da):</span>
+              <div class="text-white font-bold">${aa.molWeight ? aa.molWeight + ' Da' : 'N/A'}</div>
+            </div>
+            <div>
+              <span class="text-slate-400">Công thức phân tử:</span>
+              <div class="text-teal-400 font-bold">${aa.formula}</div>
+            </div>
+          </div>
+
+          <div>
+            <span class="font-bold text-slate-200 block mb-1.5">Các bộ ba Codon trên mARN quy định:</span>
+            <div class="flex flex-wrap gap-1.5">
+              ${codonListFormatted}
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-3 border-t border-slate-800 flex justify-end">
+          <button onclick="closeAminoModal()" class="px-4 py-2 rounded-xl bg-slate-700 hover:bg-slate-600 text-white text-xs font-semibold transition">
+            Đóng cửa sổ
+          </button>
+        </div>
+      `;
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeAminoModal() {
+      document.getElementById('aminoDetailModal').classList.add('hidden');
+    }
+
+    /* ===================================================================
+       7. HELP MODAL & TOAST NOTIFICATION
+       =================================================================== */
+    function openHelpModal() {
+      document.getElementById('helpModal').classList.remove('hidden');
+    }
+
+    function closeHelpModal() {
+      document.getElementById('helpModal').classList.add('hidden');
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toastNotification');
+      const toastMsg = document.getElementById('toastMessage');
+      toastMsg.textContent = msg;
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-20', 'opacity-0');
+      }, 2500);
+    }
+
+    // Close modals with Escape key
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeAminoModal();
+        closeHelpModal();
+      }
+    });
+
+    /* ===================================================================
+       8. INITIALIZATION
+       =================================================================== */
+    window.addEventListener('DOMContentLoaded', () => {
+      // 1. Load standard DNA preset for Tab 1
+      loadPreset('standard');
+
+      // 2. Initialize Direct & Inverse Calculator for Tab 2
+      calculateDirect();
+      changeInverseInputType();
+
+      // 3. Render 20 Amino acids for Tab 3
+      renderAminoCards();
+    });
+  </script>
+</body>
+</html>
